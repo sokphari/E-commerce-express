@@ -4,6 +4,7 @@ const { authenticate, authorize } = require("../middleware/auth.middleware");
 const adminBrandRoutes = require("./admin-brand.routes");
 const adminCategoryRoutes = require("./admin-category.routes");
 const adminProductRoutes = require("./admin-product.routes");
+const adminProductVariantRoutes = require("./admin-product-variant.routes");
 
 const router = express.Router();
 
@@ -14,5 +15,6 @@ router.get("/me", adminController.getAdminMe);
 router.use("/brands", adminBrandRoutes);
 router.use("/categories", adminCategoryRoutes);
 router.use("/products", adminProductRoutes);
+router.use("/", adminProductVariantRoutes);
 
 module.exports = router;

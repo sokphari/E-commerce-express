@@ -432,6 +432,62 @@ Product verification already done:
 - Admin can archive a product.
 - Archived product is hidden from public detail route.
 
+## Product Variant Module Completed
+
+Product variant management has been implemented.
+
+Completed files:
+
+- `src/routes/admin-product-variant.routes.js`
+- `src/controllers/product-variant.controller.js`
+- `src/services/product-variant.service.js`
+- `src/repositories/product-variant.repository.js`
+- `src/validators/product-variant.validator.js`
+- `src/utils/product-variant.js`
+
+Updated files:
+
+- `src/routes/admin.routes.js`
+
+Admin product variant endpoints:
+
+```http
+GET    /api/v1/admin/variants
+GET    /api/v1/admin/products/:productId/variants
+POST   /api/v1/admin/products/:productId/variants
+PATCH  /api/v1/admin/variants/:id
+DELETE /api/v1/admin/variants/:id
+```
+
+Variant features:
+
+- Admins can list variants.
+- Admins can list variants for one product.
+- Admins can create variants for a product.
+- Admins can update variant SKU, attributes, price, sale price, stock, threshold, and status.
+- Admins can archive variants by setting status to `INACTIVE`.
+- SKU must be unique.
+- Variant belongs to a valid, non-archived product.
+- Sale price cannot be greater than price.
+- Stock quantity cannot be negative.
+- Low stock threshold cannot be negative.
+- List endpoint supports pagination.
+- List endpoint supports product filter.
+- List endpoint supports status filter.
+- List endpoint supports low-stock filter.
+
+Variant verification already done:
+
+- Admin can create a variant for a product.
+- Admin can list variants by product.
+- Admin can list all variants with product filter.
+- Duplicate SKU is rejected with `409`.
+- Admin can update stock, price, and sale price.
+- Low-stock filter can find a variant below threshold.
+- Customer is blocked from admin variant creation with `403`.
+- Invalid sale price is rejected with `400`.
+- Admin can archive a variant.
+
 ## Useful Commands
 
 Start development server:
@@ -463,17 +519,16 @@ npm run create-admin -- --email=admin@example.com --password=Password123
 Next recommended task:
 
 ```text
-Product Variant module
+Search, filter, and pagination improvements
 ```
 
 Reason:
 
-Product management is ready. The next backend feature should be product variants because stock, SKU, price overrides, color, storage, and RAM belong to variants.
+Product variants are ready. The next backend feature should improve product search and filtering so customers can filter products by variant attributes like color, storage, stock availability, and price range.
 
 Recommended build order:
 
-1. Product variant module
-2. Search, filter, and pagination improvements
-3. Address module
-4. Cart module
-5. Checkout and orders
+1. Search, filter, and pagination improvements
+2. Address module
+3. Cart module
+4. Checkout and orders
