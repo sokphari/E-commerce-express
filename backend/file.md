@@ -550,6 +550,56 @@ Search/filter verification already done:
 - Pagination metadata still works.
 - Invalid price ranges are rejected with `422`.
 
+## Address Module Completed
+
+Customer address management has been implemented.
+
+Completed files:
+
+- `src/routes/address.routes.js`
+- `src/controllers/address.controller.js`
+- `src/services/address.service.js`
+- `src/repositories/address.repository.js`
+- `src/validators/address.validator.js`
+- `src/utils/address.js`
+
+Updated files:
+
+- `src/app.js`
+
+Customer address endpoints:
+
+```http
+GET    /api/v1/addresses
+POST   /api/v1/addresses
+PATCH  /api/v1/addresses/:id
+PATCH  /api/v1/addresses/:id/default
+DELETE /api/v1/addresses/:id
+```
+
+Address features:
+
+- Customers can list their own addresses.
+- Customers can create addresses.
+- Customers can update their own addresses.
+- Customers can delete their own addresses.
+- Customers can set one address as default.
+- First customer address automatically becomes default.
+- Only one default address is kept per customer.
+- Address ownership is enforced.
+- Unauthenticated users cannot access address routes.
+
+Address verification already done:
+
+- Missing auth is rejected with `401`.
+- First created address becomes default.
+- Creating another default address unsets the previous default.
+- Listing addresses returns only the current customer's addresses.
+- Customer can update their own address.
+- Cross-user address update is rejected with `404`.
+- Customer can set an address as default.
+- Customer can delete their own address.
+
 ## Useful Commands
 
 Start development server:
@@ -581,15 +631,14 @@ npm run create-admin -- --email=admin@example.com --password=Password123
 Next recommended task:
 
 ```text
-Address module
+Cart module
 ```
 
 Reason:
 
-Product browsing is now stronger. The next backend feature should be customer address management because checkout needs a validated shipping address before orders can be created.
+Customer address management is ready. The next backend feature should be cart management because customers need to add product variants to a cart before checkout.
 
 Recommended build order:
 
-1. Address module
-2. Cart module
-3. Checkout and orders
+1. Cart module
+2. Checkout and orders

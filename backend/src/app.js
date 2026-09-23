@@ -11,6 +11,7 @@ const adminRoutes = require("./routes/admin.routes");
 const brandRoutes = require("./routes/brand.routes");
 const categoryRoutes = require("./routes/category.routes");
 const productRoutes = require("./routes/product.routes");
+const addressRoutes = require("./routes/address.routes");
 const notFound = require("./middleware/not-found.middleware");
 const errorHandler = require("./middleware/error.middleware");
 
@@ -39,6 +40,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/brands", brandRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/addresses", addressRoutes);
 app.use("/api/v1/admin", adminRoutes);
 
 app.use(notFound);
