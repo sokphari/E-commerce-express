@@ -19,8 +19,11 @@ const wishlistRoutes = require("./routes/wishlist.routes");
 const reviewRoutes = require("./routes/review.routes");
 const notFound = require("./middleware/not-found.middleware");
 const errorHandler = require("./middleware/error.middleware");
+const { setupSwagger } = require("./docs/swagger");
 
 const app = express();
+
+setupSwagger(app);
 
 app.use(helmet());
 app.use(

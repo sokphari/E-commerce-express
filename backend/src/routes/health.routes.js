@@ -1,3 +1,21 @@
+/**
+ * @openapi
+ * /api/v1/health:
+ *   get:
+ *     tags: [Health]
+ *     summary: Check API health
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ * /api/v1/health/db:
+ *   get:
+ *     tags: [Health]
+ *     summary: Check PostgreSQL connection
+ *     responses:
+ *       200:
+ *         description: Database is connected
+ */
+
 const express = require("express");
 const pool = require("../config/database");
 

@@ -1,3 +1,16 @@
+/**
+ * @openapi
+ * /api/v1/users/me:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get current user profile
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile
+ */
+
 const express = require("express");
 const userController = require("../controllers/user.controller");
 const { authenticate } = require("../middleware/auth.middleware");

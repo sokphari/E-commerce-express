@@ -960,6 +960,49 @@ Tests:       7 passed, 7 total
 
 The test suite creates temporary `jest_*` data and cleans it up after the run.
 
+## Swagger Documentation Completed
+
+Swagger/OpenAPI documentation has been added.
+
+Completed files:
+
+- `src/docs/swagger.js`
+
+Updated files:
+
+- `src/app.js`
+- route files under `src/routes/` with OpenAPI annotations
+- `package.json`
+- `package-lock.json`
+
+Installed dependencies:
+
+- `swagger-jsdoc`
+- `swagger-ui-express`
+
+Swagger endpoints:
+
+```http
+GET /api-docs
+GET /api-docs.json
+```
+
+Swagger features:
+
+- Browser API documentation page.
+- OpenAPI JSON spec.
+- Bearer token authorization support.
+- Request body examples for core modules.
+- Documented auth, catalog, cart, checkout, orders, wishlist, reviews, admin payments, and inventory endpoints.
+
+Swagger verification already done:
+
+- App loads successfully.
+- OpenAPI spec generates successfully.
+- Spec currently documents 46 paths.
+- `GET /api-docs.json` returns `200` with OpenAPI `3.0.0`.
+- Automated tests still pass.
+
 ## Useful Commands
 
 Start development server:
@@ -992,6 +1035,12 @@ Run tests:
 npm test
 ```
 
+Open Docker setup:
+
+```http
+http://localhost:5000/api-docs
+```
+
 ## Recommended Next Task
 
 Next recommended task:
@@ -1002,10 +1051,10 @@ Swagger docs
 
 Reason:
 
-Automated tests are ready. The next task should be Swagger/OpenAPI documentation so teammates and frontend developers can inspect and try the API more easily.
+Swagger docs are ready. The next task should be Docker setup so the backend, PostgreSQL, and later Redis can run consistently across machines.
 
 Recommended build order:
 
-1. Swagger docs
-2. Docker setup
-3. More test coverage
+1. Docker setup
+2. More test coverage
+3. README polish
