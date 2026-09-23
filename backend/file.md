@@ -600,6 +600,366 @@ Address verification already done:
 - Customer can set an address as default.
 - Customer can delete their own address.
 
+## Cart Module Completed
+
+Customer cart management has been implemented.
+
+Completed files:
+
+- `src/routes/cart.routes.js`
+- `src/controllers/cart.controller.js`
+- `src/services/cart.service.js`
+- `src/repositories/cart.repository.js`
+- `src/validators/cart.validator.js`
+- `src/utils/cart.js`
+
+Updated files:
+
+- `src/app.js`
+
+Customer cart endpoints:
+
+```http
+GET    /api/v1/cart
+POST   /api/v1/cart/items
+PATCH  /api/v1/cart/items/:id
+DELETE /api/v1/cart/items/:id
+DELETE /api/v1/cart
+```
+
+Cart features:
+
+- Customers can view their cart.
+- Cart is created automatically for a customer when needed.
+- Customers can add product variants to cart.
+- Adding the same variant again increases the existing cart item quantity.
+- Customers can update cart item quantity.
+- Customers can remove one cart item.
+- Customers can clear the whole cart.
+- Cart totals are calculated on the backend.
+- Cart uses variant effective price: `sale_price` when present, otherwise `price`.
+- Product must be active.
+- Variant must be active.
+- Quantity must be positive.
+- Quantity cannot exceed available variant stock.
+- Cart item ownership is enforced.
+
+Cart verification already done:
+
+- Missing auth is rejected with `401`.
+- Customer can add a variant to cart.
+- Duplicate add merges into one cart item.
+- Over-stock add is rejected with `400`.
+- Customer can update cart item quantity.
+- Cross-user cart item delete is rejected with `404`.
+- Customer can remove a cart item.
+- Customer can clear cart.
+
+## Checkout and Orders Module Completed
+
+Checkout and order management has been implemented.
+
+Completed files:
+
+- `src/routes/checkout.routes.js`
+- `src/routes/order.routes.js`
+- `src/routes/admin-order.routes.js`
+- `src/controllers/checkout.controller.js`
+- `src/controllers/order.controller.js`
+- `src/services/checkout.service.js`
+- `src/services/order.service.js`
+- `src/repositories/checkout.repository.js`
+- `src/repositories/order.repository.js`
+- `src/validators/checkout.validator.js`
+- `src/validators/order.validator.js`
+- `src/utils/order.js`
+
+Updated files:
+
+- `src/app.js`
+- `src/routes/admin.routes.js`
+
+Customer checkout/order endpoints:
+
+```http
+POST /api/v1/checkout
+GET  /api/v1/orders
+GET  /api/v1/orders/:id
+POST /api/v1/orders/:id/cancel
+```
+
+Admin order endpoints:
+
+```http
+GET   /api/v1/admin/orders
+GET   /api/v1/admin/orders/:id
+PATCH /api/v1/admin/orders/:id/status
+```
+
+Checkout features:
+
+- Checkout validates the customer's address.
+- Checkout validates the cart is not empty.
+- Checkout validates products and variants are active.
+- Checkout validates stock is still enough.
+- Checkout calculates totals on the backend.
+- Checkout creates order and order item snapshots.
+- Checkout reduces variant stock.
+- Checkout creates inventory movement records.
+- Checkout creates a payment record.
+- Checkout clears the cart after success.
+- Checkout runs inside a PostgreSQL transaction.
+
+Order features:
+
+- Customers can list their own orders.
+- Customers can view their own order details.
+- Customers can cancel eligible orders.
+- Admins can list all orders.
+- Admins can view any order details.
+- Admins can update order status through legal transitions.
+- Cancelling an order restores variant stock and creates `ORDER_CANCEL` inventory movements.
+
+Checkout/order verification already done:
+
+- Checkout creates an order from cart.
+- Checkout creates order item snapshot.
+- Checkout creates payment record.
+- Variant stock is reduced.
+- Cart is cleared after checkout.
+- Customer can list orders.
+- Customer can view order detail.
+- Admin can list orders.
+- Admin can update status from `PENDING` to `CONFIRMED`.
+- Invalid status transition is rejected with `400`.
+- App and order modules load successfully after stock-restore cancellation update.
+
+## Payment and Inventory Audit Endpoints Completed
+
+Admin payment and inventory movement visibility has been implemented.
+
+Completed files:
+
+- `src/routes/admin-payment.routes.js`
+- `src/routes/admin-inventory-movement.routes.js`
+- `src/controllers/payment.controller.js`
+- `src/controllers/inventory-movement.controller.js`
+- `src/services/payment.service.js`
+- `src/services/inventory-movement.service.js`
+- `src/repositories/payment.repository.js`
+- `src/repositories/inventory-movement.repository.js`
+- `src/validators/payment.validator.js`
+- `src/validators/inventory-movement.validator.js`
+- `src/utils/inventory-movement.js`
+
+Updated files:
+
+- `src/routes/admin.routes.js`
+
+Admin payment endpoints:
+
+```http
+GET   /api/v1/admin/payments
+GET   /api/v1/admin/payments/:id
+PATCH /api/v1/admin/payments/:id/status
+```
+
+Admin inventory movement endpoints:
+
+```http
+GET /api/v1/admin/inventory-movements
+GET /api/v1/admin/variants/:variantId/inventory-movements
+```
+
+Payment features:
+
+- Admins can list payments.
+- Admins can filter payments by order, status, and payment method.
+- Admins can view payment detail.
+- Admins can update payment status.
+- Updating payment status also updates the related order payment status.
+
+Inventory movement features:
+
+- Admins can list inventory movements.
+- Admins can filter by variant, type, reference type, and reference id.
+- Admins can view movement history for one variant.
+- Movement responses include basic variant and product context.
+
+Payment/inventory verification already done:
+
+- Checkout creates a payment and inventory movement.
+- Admin can list pending payments.
+- Admin can view payment detail.
+- Admin can update payment status to `PAID`.
+- Admin can list inventory movements by order reference id.
+- Admin can list movements for one variant.
+- Temporary test records were cleaned up in the same test script.
+
+## Wishlist Module Completed
+
+Customer wishlist management has been implemented.
+
+Completed files:
+
+- `migrations/002_create_wishlists.sql`
+- `src/routes/wishlist.routes.js`
+- `src/controllers/wishlist.controller.js`
+- `src/services/wishlist.service.js`
+- `src/repositories/wishlist.repository.js`
+- `src/validators/wishlist.validator.js`
+- `src/utils/wishlist.js`
+
+Updated files:
+
+- `src/app.js`
+
+Customer wishlist endpoints:
+
+```http
+GET    /api/v1/wishlist
+POST   /api/v1/wishlist/:productId
+DELETE /api/v1/wishlist/:productId
+```
+
+Wishlist features:
+
+- Customers can list saved products.
+- Customers can add active products to wishlist.
+- Customers can remove products from wishlist.
+- Wishlist stores products, not variants.
+- Duplicate wishlist items are rejected with `409`.
+- Inactive products are rejected.
+- Wishlist ownership is enforced by logged-in user.
+- `wishlists` table has unique `user_id + product_id` protection.
+
+Wishlist verification already done:
+
+- Missing auth is rejected with `401`.
+- Customer can add an active product.
+- Duplicate add is rejected with `409`.
+- Customer can list own wishlist.
+- Another customer cannot see the first customer's wishlist.
+- Inactive product add is rejected with `400`.
+- Customer can remove wishlist item.
+- Removing missing item returns `404`.
+- Temporary test records were cleaned up in the same test script.
+
+## Reviews Module Completed
+
+Customer product reviews and admin moderation have been implemented.
+
+Completed files:
+
+- `migrations/003_create_reviews.sql`
+- `src/routes/review.routes.js`
+- `src/routes/admin-review.routes.js`
+- `src/controllers/review.controller.js`
+- `src/services/review.service.js`
+- `src/repositories/review.repository.js`
+- `src/validators/review.validator.js`
+- `src/utils/review.js`
+
+Updated files:
+
+- `src/app.js`
+- `src/routes/admin.routes.js`
+
+Public/customer review endpoints:
+
+```http
+GET    /api/v1/products/:productId/reviews
+POST   /api/v1/products/:productId/reviews
+PATCH  /api/v1/reviews/:id
+DELETE /api/v1/reviews/:id
+```
+
+Admin review endpoints:
+
+```http
+GET   /api/v1/admin/reviews
+PATCH /api/v1/admin/reviews/:id/status
+```
+
+Review features:
+
+- Public users can list approved reviews for a product.
+- Customers can review active products after a delivered purchase.
+- Customers can update their own reviews.
+- Updating a review resets status to `PENDING`.
+- Customers can delete their own reviews.
+- Admins can list reviews by product, user, and status.
+- Admins can approve, reject, or return reviews to pending.
+- Rating is limited to 1 through 5.
+- One customer can only review a product once.
+
+Review verification already done:
+
+- Customer without delivered purchase is rejected with `403`.
+- Customer with delivered purchase can create review.
+- New review starts as `PENDING`.
+- Duplicate review is rejected with `409`.
+- Admin can list pending reviews.
+- Admin can approve review.
+- Public review list shows approved reviews.
+- Customer update resets review status to `PENDING`.
+- Cross-user delete is rejected with `404`.
+- Owner can delete review.
+- Temporary test records were cleaned up in the same test script.
+
+## Automated Tests Completed
+
+Core integration tests have been added with Jest and Supertest.
+
+Completed files:
+
+- `jest.config.js`
+- `tests/setup-env.js`
+- `tests/integration/core-flow.test.js`
+
+Updated files:
+
+- `package.json`
+- `package-lock.json`
+- `src/app.js`
+- `src/config/env.js`
+
+New test commands:
+
+```bash
+npm test
+npm run test:watch
+```
+
+Test coverage currently includes:
+
+- Customer registration.
+- Admin login.
+- Customer blocked from admin route.
+- Admin brand/category/product/variant setup.
+- Public product listing with stock availability.
+- Add variant to cart.
+- Reject cart quantity above stock.
+- Create address.
+- Checkout order from cart.
+- Cart cleared after checkout.
+- Wishlist add and duplicate rejection.
+- Review blocked before delivered purchase.
+- Admin order status transitions to delivered.
+- Review creation after delivered purchase.
+- Admin review approval.
+- Public approved review listing.
+- Cross-user review delete blocked.
+
+Test verification already done:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+```
+
+The test suite creates temporary `jest_*` data and cleans it up after the run.
+
 ## Useful Commands
 
 Start development server:
@@ -626,19 +986,26 @@ Create admin:
 npm run create-admin -- --email=admin@example.com --password=Password123
 ```
 
+Run tests:
+
+```bash
+npm test
+```
+
 ## Recommended Next Task
 
 Next recommended task:
 
 ```text
-Cart module
+Swagger docs
 ```
 
 Reason:
 
-Customer address management is ready. The next backend feature should be cart management because customers need to add product variants to a cart before checkout.
+Automated tests are ready. The next task should be Swagger/OpenAPI documentation so teammates and frontend developers can inspect and try the API more easily.
 
 Recommended build order:
 
-1. Cart module
-2. Checkout and orders
+1. Swagger docs
+2. Docker setup
+3. More test coverage

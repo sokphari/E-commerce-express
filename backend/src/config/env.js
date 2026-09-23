@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: process.env.NODE_ENV === "test" });
 
 const env = {
   nodeEnv: process.env.NODE_ENV || "development",
