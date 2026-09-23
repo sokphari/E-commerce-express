@@ -488,6 +488,68 @@ Variant verification already done:
 - Invalid sale price is rejected with `400`.
 - Admin can archive a variant.
 
+## Search, Filter, and Pagination Improvements Completed
+
+Product browsing filters have been improved to use product variant data.
+
+Updated files:
+
+- `src/repositories/product.repository.js`
+- `src/services/product.service.js`
+- `src/validators/product.validator.js`
+- `src/utils/product.js`
+
+Improved product list endpoint:
+
+```http
+GET /api/v1/products
+GET /api/v1/admin/products
+```
+
+New/expanded product query filters:
+
+```text
+search
+brandId
+categoryId
+isFeatured
+color
+storage
+ram
+minPrice
+maxPrice
+availability=in_stock
+availability=out_of_stock
+sort=newest
+sort=price_asc
+sort=price_desc
+sort=name_asc
+sort=name_desc
+page
+limit
+```
+
+Product list responses now include variant-derived summary fields:
+
+```text
+minEffectivePrice
+maxEffectivePrice
+totalStockQuantity
+activeVariantCount
+```
+
+Search/filter verification already done:
+
+- Product list can filter by variant color.
+- Product list can filter by variant storage.
+- Product list can filter by variant RAM.
+- Product list can filter by variant effective price range.
+- Product list can filter by in-stock availability.
+- Product list can filter by out-of-stock availability.
+- Product list can sort by variant effective price.
+- Pagination metadata still works.
+- Invalid price ranges are rejected with `422`.
+
 ## Useful Commands
 
 Start development server:
@@ -519,16 +581,15 @@ npm run create-admin -- --email=admin@example.com --password=Password123
 Next recommended task:
 
 ```text
-Search, filter, and pagination improvements
+Address module
 ```
 
 Reason:
 
-Product variants are ready. The next backend feature should improve product search and filtering so customers can filter products by variant attributes like color, storage, stock availability, and price range.
+Product browsing is now stronger. The next backend feature should be customer address management because checkout needs a validated shipping address before orders can be created.
 
 Recommended build order:
 
-1. Search, filter, and pagination improvements
-2. Address module
-3. Cart module
-4. Checkout and orders
+1. Address module
+2. Cart module
+3. Checkout and orders

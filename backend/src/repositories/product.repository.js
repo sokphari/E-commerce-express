@@ -14,6 +14,10 @@ const productSelect = `
   p.created_at,
   p.updated_at,
   p.deleted_at,
+  variant_stats.min_effective_price,
+  variant_stats.max_effective_price,
+  variant_stats.total_stock_quantity,
+  variant_stats.active_variant_count,
   b.name AS brand_name,
   b.slug AS brand_slug,
   c.name AS category_name,
@@ -23,8 +27,8 @@ const productSelect = `
 function getSortClause(sort) {
   const sortMap = {
     newest: "p.created_at DESC",
-    price_asc: "p.base_price ASC",
-    price_desc: "p.base_price DESC",
+    price_asc: "COALESCE(variant_stats.min_effective_price, p.base_price) ASC",
+    price_desc: "COALESCE(variant_stats.min_effective_price, p.base_price) DESC",
     name_asc: "p.name ASC",
     name_desc: "p.name DESC",
   };
@@ -32,7 +36,38 @@ function getSortClause(sort) {
   return sortMap[sort] || sortMap.newest;
 }
 
-async function listProducts({ search, brandId, categoryId, status, isFeatured, includeDeleted, sort, limit, offset }) {
+function addVariantFilter(conditions, values, sql, value = undefined) {
+  if (value !== undefined) {
+    values.push(value);
+  }
+
+  conditions.push(`
+    EXISTS (
+      SELECT 1
+      FROM product_variants filter_variants
+      WHERE filter_variants.product_id = p.id
+        ${sql(values.length)}
+    )
+  `);
+}
+
+async function listProducts({
+  search,
+  brandId,
+  categoryId,
+  status,
+  isFeatured,
+  color,
+  storage,
+  ram,
+  minPrice,
+  maxPrice,
+  availability,
+  includeDeleted,
+  sort,
+  limit,
+  offset,
+}) {
   const values = [];
   const conditions = [];
 
@@ -65,6 +100,77 @@ async function listProducts({ search, brandId, categoryId, status, isFeatured, i
     conditions.push(`p.is_featured = $${values.length}`);
   }
 
+  if (color) {
+    addVariantFilter(
+      conditions,
+      values,
+      (index) => `AND filter_variants.status = 'ACTIVE' AND filter_variants.color ILIKE $${index}`,
+      `%${color}%`
+    );
+  }
+
+  if (storage) {
+    addVariantFilter(
+      conditions,
+      values,
+      (index) => `AND filter_variants.status = 'ACTIVE' AND filter_variants.storage ILIKE $${index}`,
+      `%${storage}%`
+    );
+  }
+
+  if (ram) {
+    addVariantFilter(
+      conditions,
+      values,
+      (index) => `AND filter_variants.status = 'ACTIVE' AND filter_variants.ram ILIKE $${index}`,
+      `%${ram}%`
+    );
+  }
+
+  if (minPrice !== undefined) {
+    addVariantFilter(
+      conditions,
+      values,
+      (index) =>
+        `AND filter_variants.status = 'ACTIVE' AND COALESCE(filter_variants.sale_price, filter_variants.price) >= $${index}`,
+      minPrice
+    );
+  }
+
+  if (maxPrice !== undefined) {
+    addVariantFilter(
+      conditions,
+      values,
+      (index) =>
+        `AND filter_variants.status = 'ACTIVE' AND COALESCE(filter_variants.sale_price, filter_variants.price) <= $${index}`,
+      maxPrice
+    );
+  }
+
+  if (availability === "in_stock") {
+    conditions.push(`
+      EXISTS (
+        SELECT 1
+        FROM product_variants filter_variants
+        WHERE filter_variants.product_id = p.id
+          AND filter_variants.status = 'ACTIVE'
+          AND filter_variants.stock_quantity > 0
+      )
+    `);
+  }
+
+  if (availability === "out_of_stock") {
+    conditions.push(`
+      NOT EXISTS (
+        SELECT 1
+        FROM product_variants filter_variants
+        WHERE filter_variants.product_id = p.id
+          AND filter_variants.status = 'ACTIVE'
+          AND filter_variants.stock_quantity > 0
+      )
+    `);
+  }
+
   const whereClause = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
   values.push(limit);
@@ -78,6 +184,16 @@ async function listProducts({ search, brandId, categoryId, status, isFeatured, i
       FROM products p
       LEFT JOIN brands b ON b.id = p.brand_id
       LEFT JOIN categories c ON c.id = p.category_id
+      LEFT JOIN LATERAL (
+        SELECT
+          MIN(COALESCE(v.sale_price, v.price)) AS min_effective_price,
+          MAX(COALESCE(v.sale_price, v.price)) AS max_effective_price,
+          COALESCE(SUM(v.stock_quantity), 0)::int AS total_stock_quantity,
+          COUNT(*)::int AS active_variant_count
+        FROM product_variants v
+        WHERE v.product_id = p.id
+          AND v.status = 'ACTIVE'
+      ) variant_stats ON true
       ${whereClause}
       ORDER BY ${getSortClause(sort)}
       LIMIT ${limitPlaceholder}
@@ -99,6 +215,16 @@ async function findById(id) {
       FROM products p
       LEFT JOIN brands b ON b.id = p.brand_id
       LEFT JOIN categories c ON c.id = p.category_id
+      LEFT JOIN LATERAL (
+        SELECT
+          MIN(COALESCE(v.sale_price, v.price)) AS min_effective_price,
+          MAX(COALESCE(v.sale_price, v.price)) AS max_effective_price,
+          COALESCE(SUM(v.stock_quantity), 0)::int AS total_stock_quantity,
+          COUNT(*)::int AS active_variant_count
+        FROM product_variants v
+        WHERE v.product_id = p.id
+          AND v.status = 'ACTIVE'
+      ) variant_stats ON true
       WHERE p.id = $1
     `,
     [id]
@@ -114,6 +240,16 @@ async function findBySlug(slug) {
       FROM products p
       LEFT JOIN brands b ON b.id = p.brand_id
       LEFT JOIN categories c ON c.id = p.category_id
+      LEFT JOIN LATERAL (
+        SELECT
+          MIN(COALESCE(v.sale_price, v.price)) AS min_effective_price,
+          MAX(COALESCE(v.sale_price, v.price)) AS max_effective_price,
+          COALESCE(SUM(v.stock_quantity), 0)::int AS total_stock_quantity,
+          COUNT(*)::int AS active_variant_count
+        FROM product_variants v
+        WHERE v.product_id = p.id
+          AND v.status = 'ACTIVE'
+      ) variant_stats ON true
       WHERE p.slug = $1
     `,
     [slug]

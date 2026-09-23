@@ -2,20 +2,38 @@ const { z } = require("zod");
 
 const productStatusSchema = z.enum(["DRAFT", "ACTIVE", "INACTIVE", "OUT_OF_STOCK"]);
 const sortSchema = z.enum(["newest", "price_asc", "price_desc", "name_asc", "name_desc"]);
+const availabilitySchema = z.enum(["in_stock", "out_of_stock"]);
 
 const listProductsSchema = z.object({
   body: z.object({}).optional(),
   params: z.object({}).optional(),
-  query: z.object({
-    search: z.string().trim().max(100).optional(),
-    brandId: z.string().uuid().optional(),
-    categoryId: z.string().uuid().optional(),
-    status: productStatusSchema.optional(),
-    isFeatured: z.coerce.boolean().optional(),
-    sort: sortSchema.optional(),
-    page: z.coerce.number().int().positive().optional(),
-    limit: z.coerce.number().int().positive().max(100).optional(),
-  }),
+  query: z
+    .object({
+      search: z.string().trim().max(100).optional(),
+      brandId: z.string().uuid().optional(),
+      categoryId: z.string().uuid().optional(),
+      status: productStatusSchema.optional(),
+      isFeatured: z.coerce.boolean().optional(),
+      color: z.string().trim().max(80).optional(),
+      storage: z.string().trim().max(80).optional(),
+      ram: z.string().trim().max(80).optional(),
+      minPrice: z.coerce.number().min(0).optional(),
+      maxPrice: z.coerce.number().min(0).optional(),
+      availability: availabilitySchema.optional(),
+      sort: sortSchema.optional(),
+      page: z.coerce.number().int().positive().optional(),
+      limit: z.coerce.number().int().positive().max(100).optional(),
+    })
+    .refine(
+      (value) =>
+        value.minPrice === undefined ||
+        value.maxPrice === undefined ||
+        value.minPrice <= value.maxPrice,
+      {
+        message: "minPrice cannot be greater than maxPrice",
+        path: ["minPrice"],
+      }
+    ),
 });
 
 const productSlugSchema = z.object({
