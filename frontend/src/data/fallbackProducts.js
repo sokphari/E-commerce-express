@@ -1,0 +1,32 @@
+export const fallbackProducts = [
+  {
+    id: "demo-iphone-15",
+    name: "iPhone 15",
+    slug: "iphone-15",
+    shortDescription: "Apple smartphone with USB-C, A16 Bionic, and strong everyday camera performance.",
+    basePrice: "799.00",
+    totalStockQuantity: 12,
+    brand: { name: "Apple" },
+    category: { name: "Phones" },
+  },
+  {
+    id: "demo-galaxy-s24",
+    name: "Galaxy S24",
+    slug: "galaxy-s24",
+    shortDescription: "Compact Android flagship with bright display, AI tools, and all-day power.",
+    basePrice: "749.00",
+    totalStockQuantity: 9,
+    brand: { name: "Samsung" },
+    category: { name: "Phones" },
+  },
+  {
+    id: "demo-airpods-pro",
+    name: "AirPods Pro",
+    slug: "airpods-pro",
+    shortDescription: "Wireless earbuds with active noise cancellation and MagSafe charging case.",
+    basePrice: "249.00",
+    totalStockQuantity: 18,
+    brand: { name: "Apple" },
+    category: { name: "Accessories" },
+  },
+];
