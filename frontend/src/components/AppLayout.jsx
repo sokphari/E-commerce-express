@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { LogOut, Menu, Search, ShoppingBag, Smartphone, UserRound } from "lucide-react";
+import { Heart, LogOut, Menu, Search, ShoppingBag, Smartphone, UserRound } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 export default function AppLayout() {
@@ -16,6 +16,9 @@ export default function AppLayout() {
         <nav className="nav-links" aria-label="Main navigation">
           <NavLink to="/">Shop</NavLink>
           <NavLink to="/cart">Cart</NavLink>
+          <NavLink to="/checkout">Checkout</NavLink>
+          {user ? <NavLink to="/wishlist">Wishlist</NavLink> : null}
+          {user ? <NavLink to="/orders">Orders</NavLink> : null}
           {user ? <NavLink to="/account">Account</NavLink> : <NavLink to="/login">Login</NavLink>}
         </nav>
 
@@ -26,6 +29,11 @@ export default function AppLayout() {
           <Link className="icon-button" to="/cart" title="Open cart">
             <ShoppingBag size={18} />
           </Link>
+          {user ? (
+            <Link className="icon-button" to="/wishlist" title="Open wishlist">
+              <Heart size={18} />
+            </Link>
+          ) : null}
           {user ? (
             <button className="icon-button" type="button" title="Logout" onClick={logout}>
               <LogOut size={18} />

@@ -17,6 +17,11 @@ const env = {
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || "15m",
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   },
+  redis: {
+    url:
+      process.env.REDIS_URL ||
+      `redis://${process.env.REDIS_HOST || "localhost"}:${process.env.REDIS_PORT || 6379}`,
+  },
 };
 
 module.exports = env;

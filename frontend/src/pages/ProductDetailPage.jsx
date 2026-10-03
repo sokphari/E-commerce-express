@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, Star } from "lucide-react";
 import { api } from "../api/client";
 import { fallbackProducts } from "../data/fallbackProducts";
 
@@ -13,6 +13,8 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [message, setMessage] = useState("");
+  const [reviewsMessage, setReviewsMessage] = useState("");
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,10 +28,25 @@ export default function ProductDetailPage() {
         setProduct(nextProduct);
         setSelectedVariantId(nextProduct.variants?.[0]?.id || "");
         setMessage("");
+
+        if (nextProduct.id && !String(nextProduct.id).startsWith("demo-")) {
+          api.getProductReviews(nextProduct.id)
+            .then((reviewResponse) => {
+              if (!alive) return;
+              setReviews(reviewResponse.data || []);
+              setReviewsMessage("");
+            })
+            .catch((error) => {
+              if (!alive) return;
+              setReviews([]);
+              setReviewsMessage(error.message);
+            });
+        }
       } catch {
         const fallback = fallbackProducts.find((item) => item.slug === slug) || fallbackProducts[0];
         if (!alive) return;
         setProduct(fallback);
+        setReviews([]);
         setMessage("Backend product detail is not reachable, showing demo detail.");
       } finally {
         if (alive) setLoading(false);
@@ -44,6 +61,23 @@ export default function ProductDetailPage() {
 
   const variants = useMemo(() => product?.variants || [], [product]);
   const selectedVariant = variants.find((variant) => variant.id === selectedVariantId);
+  const averageRating = reviews.length
+    ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length
+    : 0;
+
+  async function addToWishlist() {
+    if (!product?.id || String(product.id).startsWith("demo-")) {
+      setMessage("Wishlist needs a real backend product.");
+      return;
+    }
+
+    try {
+      await api.addToWishlist(product.id);
+      setMessage("Added to wishlist.");
+    } catch (error) {
+      setMessage(error.message);
+    }
+  }
 
   async function addToCart() {
     if (!selectedVariant?.id) {
@@ -95,10 +129,47 @@ export default function ProductDetailPage() {
 
           <div className="detail-actions">
             <button type="button" onClick={addToCart}><ShoppingCart size={18} /> Add to cart</button>
-            <button type="button" className="secondary"><Heart size={18} /> Wishlist</button>
+            <button type="button" className="secondary" onClick={addToWishlist}><Heart size={18} /> Wishlist</button>
           </div>
         </div>
       </div>
+
+      <section className="review-section">
+        <div className="review-header">
+          <div>
+            <p className="eyebrow">Customer feedback</p>
+            <h2>Reviews</h2>
+          </div>
+          <div className="rating-summary">
+            <Star size={18} fill="currentColor" />
+            <strong>{reviews.length ? averageRating.toFixed(1) : "-"}</strong>
+            <span>{reviews.length} reviews</span>
+          </div>
+        </div>
+
+        {reviewsMessage ? <p className="notice">{reviewsMessage}</p> : null}
+
+        {reviews.length ? (
+          <div className="review-grid">
+            {reviews.map((review) => (
+              <article className="review-card" key={review.id}>
+                <div className="review-stars" aria-label={"Rating " + review.rating + " out of 5"}>
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Star className={index < review.rating ? "star-on" : "star-off"} fill="currentColor" size={16} key={index} />
+                  ))}
+                </div>
+                <p>{review.comment || "No comment."}</p>
+                <small>{review.user ? review.user.firstName + " " + review.user.lastName : "Customer"}</small>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="review-empty">
+            <Star size={24} />
+            <p className="muted">No approved reviews yet.</p>
+          </div>
+        )}
+      </section>
     </section>
   );
 }

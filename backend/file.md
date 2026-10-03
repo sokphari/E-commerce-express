@@ -1003,6 +1003,163 @@ Swagger verification already done:
 - `GET /api-docs.json` returns `200` with OpenAPI `3.0.0`.
 - Automated tests still pass.
 
+## Docker Setup
+
+Docker setup is now available for local development and teammate onboarding.
+
+Docker files added:
+
+- `Dockerfile` builds the Node.js backend image.
+- `.dockerignore` keeps local files like `node_modules`, `.env`, logs, and Git metadata out of the image.
+- `docker-compose.yml` runs PostgreSQL and the backend together.
+
+Docker behavior:
+
+- PostgreSQL runs inside Docker with database `phonehub_db`.
+- PostgreSQL is exposed on local port `5433` to avoid conflicts with a local PostgreSQL on `5432`.
+- Backend runs on `http://localhost:5000`.
+- Backend waits for PostgreSQL health check before starting.
+- Backend runs migrations automatically before starting.
+- Swagger remains available at `http://localhost:5000/api-docs`.
+
+Docker commands:
+
+```bash
+npm run docker:up
+npm run docker:down
+npm run docker:logs
+```
+
+Create admin inside Docker after the stack is running:
+
+```bash
+docker compose exec backend npm run create-admin -- --email=admin@example.com --password=Password123
+```
+
+## README Documentation Completed
+
+README documentation has been added for teammate onboarding.
+
+Completed file:
+
+- `README.md`
+
+README includes:
+
+- Project overview.
+- Tech stack.
+- Local environment setup.
+- Local run commands.
+- Docker run commands.
+- Admin creation commands.
+- Swagger documentation links.
+- Main public, customer, and admin modules.
+- Common API URLs.
+- Bearer token authorization note.
+- Test commands.
+- Database migration notes.
+- Current recommended next task.
+
+## Automated Test Coverage Expanded
+
+More integration coverage has been added for important backend flows.
+
+Updated file:
+
+- `tests/integration/core-flow.test.js`
+
+New coverage added:
+
+- Customer order list and order detail after checkout.
+- Cross-user order protection.
+- Admin payment list, payment detail, and payment status update.
+- Admin inventory movement history for a purchased variant.
+- Wishlist list, duplicate protection, cross-user isolation, and removal.
+- Review duplicate protection and owner update flow.
+
+Verification result:
+
+```text
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+```
+
+## Redis Setup Completed
+
+Redis has been added as the first temporary-data service for the backend.
+
+Updated files:
+
+- `package.json`
+- `package-lock.json`
+- `.env.example`
+- `docker-compose.yml`
+- `src/config/env.js`
+- `src/config/redis.js`
+- `src/middleware/rate-limit.middleware.js`
+- `src/routes/auth.routes.js`
+- `README.md`
+
+Redis behavior added:
+
+- Docker Compose now starts a Redis service.
+- Backend uses `REDIS_URL` to connect to Redis.
+- Auth rate limiting protects register, login, and refresh token endpoints.
+- Rate limit is 20 attempts per 15 minutes per IP, route, and email when available.
+- If the limit is exceeded, API returns `429 Too Many Requests`.
+- Automated tests skip Redis rate limiting to stay deterministic.
+- Development requests fail open if Redis is unavailable, so local auth is not blocked by a missing Redis service.
+
+Verification result:
+
+```text
+docker compose config passed
+Test Suites: 1 passed, 1 total
+Tests:       8 passed, 8 total
+```
+
+## Frontend Foundation Started
+
+A separate React frontend project has been created beside the backend.
+
+Frontend folder:
+
+- `/home/phari/Desktop/phoneHub/frontend`
+
+Frontend stack:
+
+- React
+- Vite
+- React Router
+- Lucide React icons
+
+Completed frontend files/features:
+
+- Product catalog page.
+- Product detail page.
+- Login page.
+- Register page.
+- Cart page foundation.
+- Account page foundation.
+- Shared app layout and navigation.
+- API client using `VITE_API_BASE_URL`.
+- Auth context with token storage.
+- Demo product fallback when backend is not running.
+- Frontend README and env example.
+
+Verification result:
+
+```text
+npm run build passed
+```
+
+Frontend run command:
+
+```bash
+cd /home/phari/Desktop/phoneHub/frontend
+npm run dev
+```
+
 ## Useful Commands
 
 Start development server:
@@ -1035,7 +1192,7 @@ Run tests:
 npm test
 ```
 
-Open Docker setup:
+Open Swagger docs:
 
 ```http
 http://localhost:5000/api-docs
@@ -1046,15 +1203,15 @@ http://localhost:5000/api-docs
 Next recommended task:
 
 ```text
-Swagger docs
+Frontend cart and checkout flow
 ```
 
 Reason:
 
-Swagger docs are ready. The next task should be Docker setup so the backend, PostgreSQL, and later Redis can run consistently across machines.
+Frontend foundation is created. The next useful task is connecting the cart and checkout screens to the backend so a customer can complete the buying flow from the browser.
 
 Recommended build order:
 
-1. Docker setup
-2. More test coverage
-3. README polish
+1. Frontend cart and checkout flow
+2. Frontend wishlist and order history
+3. Admin dashboard foundation

@@ -64,6 +64,7 @@ describe("core PhoneHub API flow", () => {
   let cartItemId;
   let addressId;
   let orderId;
+  let paymentId;
   let reviewId;
 
   beforeAll(async () => {
@@ -202,6 +203,7 @@ describe("core PhoneHub API flow", () => {
     expect(checkoutResponse.status).toBe(201);
     expect(checkoutResponse.body.data.order.items).toHaveLength(1);
     orderId = checkoutResponse.body.data.order.id;
+    paymentId = checkoutResponse.body.data.payment.id;
 
     const cartResponse = await request(app)
       .get("/api/v1/cart")
@@ -210,7 +212,67 @@ describe("core PhoneHub API flow", () => {
     expect(cartResponse.body.data.cart.items).toHaveLength(0);
   });
 
-  test("supports wishlist", async () => {
+  test("lists orders, payment records, and inventory movements after checkout", async () => {
+    const customerOrdersResponse = await request(app)
+      .get("/api/v1/orders")
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(customerOrdersResponse.status).toBe(200);
+    expect(customerOrdersResponse.body.data.some((order) => order.id === orderId)).toBe(true);
+
+    const orderDetailResponse = await request(app)
+      .get(`/api/v1/orders/${orderId}`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(orderDetailResponse.status).toBe(200);
+    expect(orderDetailResponse.body.data.order.id).toBe(orderId);
+    expect(orderDetailResponse.body.data.order.items[0].productVariantId).toBe(variantId);
+
+    const crossUserOrderResponse = await request(app)
+      .get(`/api/v1/orders/${orderId}`)
+      .set("Authorization", `Bearer ${otherToken}`);
+
+    expect(crossUserOrderResponse.status).toBe(404);
+
+    const paymentsResponse = await request(app)
+      .get(`/api/v1/admin/payments?orderId=${orderId}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(paymentsResponse.status).toBe(200);
+    expect(paymentsResponse.body.data.some((payment) => payment.id === paymentId)).toBe(true);
+
+    const paymentDetailResponse = await request(app)
+      .get(`/api/v1/admin/payments/${paymentId}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(paymentDetailResponse.status).toBe(200);
+    expect(paymentDetailResponse.body.data.payment.orderId).toBe(orderId);
+
+    const paidResponse = await request(app)
+      .patch(`/api/v1/admin/payments/${paymentId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ status: "PAID" });
+
+    expect(paidResponse.status).toBe(200);
+    expect(paidResponse.body.data.payment.status).toBe("PAID");
+
+    const movementsResponse = await request(app)
+      .get(`/api/v1/admin/variants/${variantId}/inventory-movements`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(movementsResponse.status).toBe(200);
+    expect(
+      movementsResponse.body.data.some(
+        (movement) =>
+          movement.productVariantId === variantId &&
+          movement.type === "SALE" &&
+          movement.referenceId === orderId &&
+          movement.quantity === 2
+      )
+    ).toBe(true);
+  });
+
+  test("supports wishlist list and removal", async () => {
     const addResponse = await request(app)
       .post(`/api/v1/wishlist/${productId}`)
       .set("Authorization", `Bearer ${customerToken}`);
@@ -222,6 +284,33 @@ describe("core PhoneHub API flow", () => {
       .set("Authorization", `Bearer ${customerToken}`);
 
     expect(duplicateResponse.status).toBe(409);
+
+    const listResponse = await request(app)
+      .get("/api/v1/wishlist")
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(listResponse.status).toBe(200);
+    expect(listResponse.body.data.some((item) => item.product.id === productId)).toBe(true);
+
+    const otherListResponse = await request(app)
+      .get("/api/v1/wishlist")
+      .set("Authorization", `Bearer ${otherToken}`);
+
+    expect(otherListResponse.status).toBe(200);
+    expect(otherListResponse.body.data.some((item) => item.product.id === productId)).toBe(false);
+
+    const removeResponse = await request(app)
+      .delete(`/api/v1/wishlist/${productId}`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(removeResponse.status).toBe(200);
+
+    const removedListResponse = await request(app)
+      .get("/api/v1/wishlist")
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(removedListResponse.status).toBe(200);
+    expect(removedListResponse.body.data.some((item) => item.product.id === productId)).toBe(false);
   });
 
   test("supports reviews after delivered purchase and admin approval", async () => {
@@ -277,5 +366,21 @@ describe("core PhoneHub API flow", () => {
       .set("Authorization", `Bearer ${otherToken}`);
 
     expect(crossUserDelete.status).toBe(404);
+
+    const duplicateReviewResponse = await request(app)
+      .post(`/api/v1/products/${productId}/reviews`)
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({ rating: 4, comment: "Second review should not be allowed" });
+
+    expect(duplicateReviewResponse.status).toBe(409);
+
+    const updateReviewResponse = await request(app)
+      .patch(`/api/v1/reviews/${reviewId}`)
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({ rating: 4, comment: "Updated test product review" });
+
+    expect(updateReviewResponse.status).toBe(200);
+    expect(updateReviewResponse.body.data.review.rating).toBe(4);
+    expect(updateReviewResponse.body.data.review.comment).toBe("Updated test product review");
   });
 });
