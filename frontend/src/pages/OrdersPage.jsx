@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PackageSearch, ReceiptText } from "lucide-react";
+import Button from "../components/Button";
+import EmptyState from "../components/EmptyState";
+import Notice from "../components/Notice";
+import PageHeader from "../components/PageHeader";
+import StatusPill from "../components/StatusPill";
 import { api } from "../api/client";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
-
-function formatDate(value) {
-  return value ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "-";
-}
+import { formatDateTime, money } from "../lib/format";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -40,15 +38,13 @@ export default function OrdersPage() {
 
   return (
     <section className="cart-page">
-      <div className="page-title-row">
-        <div>
-          <p className="eyebrow">Purchase history</p>
-          <h1>Orders</h1>
-        </div>
-        <Link className="button-link secondary-link" to="/">Continue shopping</Link>
-      </div>
+      <PageHeader
+        eyebrow="Purchase history"
+        title="Orders"
+        actions={<Button variant="secondary" to="/">Continue shopping</Button>}
+      />
 
-      {message ? <p className="notice">{message}</p> : null}
+      {message ? <Notice>{message}</Notice> : null}
 
       {loading ? (
         <div className="cart-card skeleton" />
@@ -59,21 +55,22 @@ export default function OrdersPage() {
               <div className="cart-item-image"><ReceiptText size={24} /></div>
               <div className="cart-item-copy">
                 <h2>{order.orderNumber}</h2>
-                <p>{formatDate(order.createdAt)}</p>
+                <p>{formatDateTime(order.createdAt)}</p>
               </div>
-              <span className={`status-pill status-${order.orderStatus?.toLowerCase()}`}>{order.orderStatus}</span>
-              <span className={`status-pill status-${order.paymentStatus?.toLowerCase()}`}>{order.paymentStatus}</span>
+              <StatusPill status={order.orderStatus} />
+              <StatusPill status={order.paymentStatus} />
               <strong>{money(order.totalAmount)}</strong>
             </Link>
           ))}
         </div>
       ) : (
-        <div className="simple-panel empty-state">
-          <PackageSearch size={30} />
-          <h2>No orders yet</h2>
-          <p className="muted">When you checkout, your order history will appear here.</p>
-          <Link className="button-link" to="/">Browse products</Link>
-        </div>
+        <EmptyState
+          icon={<PackageSearch size={30} />}
+          title="No orders yet"
+          description="When you checkout, your order history will appear here."
+        >
+          <Button to="/">Browse products</Button>
+        </EmptyState>
       )}
     </section>
   );

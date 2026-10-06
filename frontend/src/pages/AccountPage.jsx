@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { Heart, Home, MapPin, PackageSearch, Plus, ShieldCheck, Star, Trash2, UserRound } from "lucide-react";
 import { Link } from "react-router-dom";
+import Button from "../components/Button";
+import Notice from "../components/Notice";
+import StatusPill from "../components/StatusPill";
 import { api } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
+import { formatDate, money } from "../lib/format";
 
 const emptyAddress = {
   recipientName: "",
@@ -14,14 +18,6 @@ const emptyAddress = {
   country: "Cambodia",
   isDefault: true,
 };
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
-
-function formatDate(value) {
-  return value ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(new Date(value)) : "-";
-}
 
 export default function AccountPage() {
   const { user } = useAuth();
@@ -105,10 +101,10 @@ export default function AccountPage() {
     return (
       <section className="simple-page">
         <div className="simple-panel">
-          <UserRound size={28} />
+          <UserRound size={28} className="text-brand" />
           <h1>Account</h1>
           <p className="muted">Login to view profile, addresses, wishlist, and orders.</p>
-          <Link className="button-link" to="/login">Login</Link>
+          <Button to="/login">Login</Button>
         </div>
       </section>
     );
@@ -123,18 +119,18 @@ export default function AccountPage() {
           <p className="lede">{user.email}</p>
         </div>
         <div className="account-role-card">
-          {user.role === "ADMIN" ? <ShieldCheck size={24} /> : <UserRound size={24} />}
+          {user.role === "ADMIN" ? <ShieldCheck size={24} className="text-brand" /> : <UserRound size={24} className="text-brand" />}
           <span>{user.role}</span>
           <small>{user.status}</small>
         </div>
       </div>
 
-      {message ? <p className="notice">{message}</p> : null}
+      {message ? <Notice>{message}</Notice> : null}
 
       <div className="account-stats">
-        <Link className="account-stat" to="/wishlist"><Heart size={22} /><span>Wishlist</span><strong>{wishlist.length}</strong></Link>
-        <Link className="account-stat" to="/orders"><PackageSearch size={22} /><span>Orders</span><strong>{orders.length}</strong></Link>
-        <a className="account-stat" href="#addresses"><MapPin size={22} /><span>Addresses</span><strong>{addresses.length}</strong></a>
+        <Link className="account-stat" to="/wishlist"><Heart size={22} className="text-brand" /><span>Wishlist</span><strong>{wishlist.length}</strong></Link>
+        <Link className="account-stat" to="/orders"><PackageSearch size={22} className="text-brand" /><span>Orders</span><strong>{orders.length}</strong></Link>
+        <a className="account-stat" href="#addresses"><MapPin size={22} className="text-brand" /><span>Addresses</span><strong>{addresses.length}</strong></a>
       </div>
 
       {user.role === "ADMIN" ? (
@@ -149,7 +145,7 @@ export default function AccountPage() {
 
       <div className="account-grid">
         <section className="cart-card checkout-section" id="addresses">
-          <div className="section-heading"><MapPin size={20} /><h2>Shipping addresses</h2></div>
+          <div className="section-heading"><MapPin size={20} className="text-brand" /><h2>Shipping addresses</h2></div>
           {loading ? <div className="skeleton" /> : addresses.length ? (
             <div className="address-list">
               {addresses.map((address) => (
@@ -165,11 +161,18 @@ export default function AccountPage() {
                   </div>
                   <div className="address-actions">
                     {!address.isDefault ? (
-                      <button className="text-button" type="button" disabled={busyAddressId === address.id} onClick={() => setDefaultAddress(address.id)}>
+                      <Button variant="ghost" size="sm" type="button" disabled={busyAddressId === address.id} onClick={() => setDefaultAddress(address.id)}>
                         <Star size={16} /> Set default
-                      </button>
+                      </Button>
                     ) : null}
-                    <button className="icon-button danger-button" type="button" disabled={busyAddressId === address.id} onClick={() => deleteAddress(address.id)} title="Delete address">
+                    <button
+                      className="icon-button text-danger transition hover:bg-danger-bg"
+                      type="button"
+                      disabled={busyAddressId === address.id}
+                      onClick={() => deleteAddress(address.id)}
+                      title="Delete address"
+                      aria-label={`Delete address for ${address.recipientName}`}
+                    >
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -180,7 +183,7 @@ export default function AccountPage() {
         </section>
 
         <section className="cart-card checkout-section">
-          <div className="section-heading"><Plus size={20} /><h2>Add address</h2></div>
+          <div className="section-heading"><Plus size={20} className="text-brand" /><h2>Add address</h2></div>
           <form className="address-form" onSubmit={createAddress}>
             <div className="form-grid">
               <label>Recipient<input value={form.recipientName} onChange={(event) => setForm({ ...form, recipientName: event.target.value })} required /></label>
@@ -196,12 +199,12 @@ export default function AccountPage() {
               <label>Country<input value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} /></label>
             </div>
             <label className="checkbox-label"><input checked={form.isDefault} onChange={(event) => setForm({ ...form, isDefault: event.target.checked })} type="checkbox" /> Use as default address</label>
-            <button type="submit" disabled={saving}><Home size={18} /> Save address</button>
+            <Button type="submit" disabled={saving}><Home size={18} /> Save address</Button>
           </form>
         </section>
 
         <section className="cart-card checkout-section account-wide">
-          <div className="section-heading"><PackageSearch size={20} /><h2>Recent orders</h2></div>
+          <div className="section-heading"><PackageSearch size={20} className="text-brand" /><h2>Recent orders</h2></div>
           {orders.length ? (
             <div className="summary-items">
               {orders.slice(0, 3).map((order) => (
@@ -210,7 +213,7 @@ export default function AccountPage() {
                     <strong>{order.orderNumber}</strong>
                     <small>{formatDate(order.createdAt)}</small>
                   </span>
-                  <span className={`status-pill status-${order.orderStatus?.toLowerCase()}`}>{order.orderStatus}</span>
+                  <StatusPill status={order.orderStatus} />
                   <strong>{money(order.totalAmount)}</strong>
                 </Link>
               ))}

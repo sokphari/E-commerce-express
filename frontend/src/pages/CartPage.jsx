@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ShoppingBag, Trash2 } from "lucide-react";
+import Button from "../components/Button";
+import EmptyState from "../components/EmptyState";
+import Notice from "../components/Notice";
+import PageHeader from "../components/PageHeader";
+import QuantityStepper from "../components/QuantityStepper";
 import { api } from "../api/client";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
+import { money } from "../lib/format";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -81,15 +83,13 @@ export default function CartPage() {
 
   return (
     <section className="cart-page">
-      <div className="page-title-row">
-        <div>
-          <p className="eyebrow">Shopping cart</p>
-          <h1>Review your items</h1>
-        </div>
-        <Link className="button-link secondary-link" to="/">Continue shopping</Link>
-      </div>
+      <PageHeader
+        eyebrow="Shopping cart"
+        title="Review your items"
+        actions={<Button variant="secondary" to="/">Continue shopping</Button>}
+      />
 
-      {message ? <p className="notice">{message}</p> : null}
+      {message ? <Notice>{message}</Notice> : null}
 
       {loading ? (
         <div className="cart-layout"><div className="cart-card skeleton" /></div>
@@ -106,20 +106,26 @@ export default function CartPage() {
                   <p>{[item.variant.color, item.variant.storage, item.variant.ram].filter(Boolean).join(" / ") || item.variant.sku}</p>
                   <span>{item.variant.sku}</span>
                 </div>
-                <div className="quantity-stepper" aria-label={`Quantity for ${item.product.name}`}>
-                  <button type="button" disabled={busyItemId === item.id || item.quantity <= 1} onClick={() => updateQuantity(item, item.quantity - 1)} title="Decrease quantity">
-                    <Minus size={16} />
-                  </button>
-                  <strong>{item.quantity}</strong>
-                  <button type="button" disabled={busyItemId === item.id || item.quantity >= Number(item.variant.stockQuantity || 0)} onClick={() => updateQuantity(item, item.quantity + 1)} title="Increase quantity">
-                    <Plus size={16} />
-                  </button>
-                </div>
+                <QuantityStepper
+                  value={item.quantity}
+                  disabled={busyItemId === item.id}
+                  decreaseDisabled={item.quantity <= 1}
+                  increaseDisabled={item.quantity >= Number(item.variant.stockQuantity || 0)}
+                  onDecrease={() => updateQuantity(item, item.quantity - 1)}
+                  onIncrease={() => updateQuantity(item, item.quantity + 1)}
+                />
                 <div className="cart-item-total">
                   <strong>{money(item.lineTotal)}</strong>
                   <small>{money(item.unitPrice)} each</small>
                 </div>
-                <button className="icon-button danger-button" type="button" disabled={busyItemId === item.id} onClick={() => removeItem(item)} title="Remove item">
+                <button
+                  className="icon-button text-danger transition hover:bg-danger-bg"
+                  type="button"
+                  disabled={busyItemId === item.id}
+                  onClick={() => removeItem(item)}
+                  title="Remove item"
+                  aria-label={`Remove ${item.product.name} from cart`}
+                >
                   <Trash2 size={18} />
                 </button>
               </article>
@@ -127,22 +133,23 @@ export default function CartPage() {
           </div>
 
           <aside className="cart-card order-summary">
-            <ShoppingBag size={24} />
+            <ShoppingBag size={24} className="text-brand" />
             <h2>Order summary</h2>
             <div className="summary-line"><span>Items</span><strong>{cart.summary.itemCount}</strong></div>
             <div className="summary-line"><span>Total quantity</span><strong>{cart.summary.totalQuantity}</strong></div>
             <div className="summary-line total"><span>Subtotal</span><strong>{money(cart.summary.subtotal)}</strong></div>
-            <button type="button" className="checkout-button" onClick={() => navigate("/checkout")}>Checkout</button>
-            <button type="button" className="text-button" disabled={busyItemId === "clear"} onClick={clearCart}>Clear cart</button>
+            <Button fullWidth onClick={() => navigate("/checkout")}>Checkout</Button>
+            <Button variant="ghost" disabled={busyItemId === "clear"} onClick={clearCart}>Clear cart</Button>
           </aside>
         </div>
       ) : (
-        <div className="simple-panel empty-state">
-          <ShoppingBag size={30} />
-          <h2>Your cart is empty</h2>
-          <p className="muted">Add a product variant to cart, then return here to test checkout.</p>
-          <Link className="button-link" to="/">Browse products</Link>
-        </div>
+        <EmptyState
+          icon={<ShoppingBag size={30} />}
+          title="Your cart is empty"
+          description="Add a product variant to cart, then return here to test checkout."
+        >
+          <Button to="/">Browse products</Button>
+        </EmptyState>
       )}
     </section>
   );

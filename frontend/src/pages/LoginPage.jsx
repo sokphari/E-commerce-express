@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
+import Button from "../components/Button";
+import Notice from "../components/Notice";
+import TextField from "../components/TextField";
 import { useAuth } from "../hooks/useAuth";
 
 export default function LoginPage() {
@@ -30,10 +33,10 @@ export default function LoginPage() {
       <form className="auth-form" onSubmit={handleSubmit}>
         <p className="eyebrow">Customer access</p>
         <h1>Login</h1>
-        {error && <p className="notice danger">{error}</p>}
-        <label>Email<input value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} type="email" required /></label>
-        <label>Password<input value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} type="password" required /></label>
-        <button type="submit" disabled={saving}><LogIn size={18} /> {saving ? "Logging in" : "Login"}</button>
+        {error && <Notice tone="danger">{error}</Notice>}
+        <TextField label="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} type="email" required />
+        <TextField label="Password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} type="password" required />
+        <Button type="submit" disabled={saving}><LogIn size={18} /> {saving ? "Logging in" : "Login"}</Button>
         <p className="form-footer">No account yet? <Link to="/register">Create one</Link></p>
       </form>
     </section>

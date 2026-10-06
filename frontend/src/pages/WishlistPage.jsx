@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
+import Button from "../components/Button";
+import EmptyState from "../components/EmptyState";
+import Notice from "../components/Notice";
+import PageHeader from "../components/PageHeader";
+import ProductThumb from "../components/ProductThumb";
 import { api } from "../api/client";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
+import { money } from "../lib/format";
 
 export default function WishlistPage() {
   const [items, setItems] = useState([]);
@@ -50,15 +51,13 @@ export default function WishlistPage() {
 
   return (
     <section className="cart-page">
-      <div className="page-title-row">
-        <div>
-          <p className="eyebrow">Saved products</p>
-          <h1>Wishlist</h1>
-        </div>
-        <Link className="button-link secondary-link" to="/">Continue shopping</Link>
-      </div>
+      <PageHeader
+        eyebrow="Saved products"
+        title="Wishlist"
+        actions={<Button variant="secondary" to="/">Continue shopping</Button>}
+      />
 
-      {message ? <p className="notice">{message}</p> : null}
+      {message ? <Notice>{message}</Notice> : null}
 
       {loading ? (
         <div className="product-grid">{Array.from({ length: 3 }).map((_, index) => <div className="skeleton" key={index} />)}</div>
@@ -66,9 +65,7 @@ export default function WishlistPage() {
         <div className="product-grid">
           {items.map((item) => (
             <article className="product-card" key={item.id}>
-              <Link className="product-image no-underline" to={`/products/${item.product.slug}`} aria-label={item.product.name}>
-                <span>{item.product.name?.slice(0, 2).toUpperCase()}</span>
-              </Link>
+              <ProductThumb name={item.product.name} to={`/products/${item.product.slug}`} ariaLabel={item.product.name} />
               <div className="product-body">
                 <div className="product-meta">
                   <span>{item.product.brand?.name || "PhoneHub"}</span>
@@ -78,7 +75,14 @@ export default function WishlistPage() {
                 <p>{item.product.shortDescription || "Saved for later."}</p>
                 <div className="product-footer">
                   <strong>{money(item.product.basePrice)}</strong>
-                  <button className="icon-button danger-button" type="button" disabled={busyProductId === item.productId} onClick={() => removeItem(item.productId)} title="Remove from wishlist">
+                  <button
+                    className="icon-button text-danger transition hover:bg-danger-bg"
+                    type="button"
+                    disabled={busyProductId === item.productId}
+                    onClick={() => removeItem(item.productId)}
+                    title="Remove from wishlist"
+                    aria-label={`Remove ${item.product.name} from wishlist`}
+                  >
                     <Trash2 size={18} />
                   </button>
                 </div>
@@ -87,12 +91,13 @@ export default function WishlistPage() {
           ))}
         </div>
       ) : (
-        <div className="simple-panel empty-state">
-          <Heart size={30} />
-          <h2>Your wishlist is empty</h2>
-          <p className="muted">Save products you like, then return here when you are ready to buy.</p>
-          <Link className="button-link" to="/"><ShoppingBag size={18} /> Browse products</Link>
-        </div>
+        <EmptyState
+          icon={<Heart size={30} />}
+          title="Your wishlist is empty"
+          description="Save products you like, then return here when you are ready to buy."
+        >
+          <Button to="/"><ShoppingBag size={18} /> Browse products</Button>
+        </EmptyState>
       )}
     </section>
   );

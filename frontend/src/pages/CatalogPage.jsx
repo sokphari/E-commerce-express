@@ -1,18 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Filter, RefreshCcw, Search } from "lucide-react";
+import Button from "../components/Button";
+import Notice from "../components/Notice";
+import ProductThumb from "../components/ProductThumb";
 import { api } from "../api/client";
 import { fallbackProducts } from "../data/fallbackProducts";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
+import { money } from "../lib/format";
 
 export default function CatalogPage() {
+  const location = useLocation();
+  const searchInputRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (location.state?.focusSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [location]);
 
   async function loadProducts(query = "", options = {}) {
     try {
@@ -70,23 +78,22 @@ export default function CatalogPage() {
         <form className="search-panel" onSubmit={handleSubmit}>
           <Search size={18} />
           <input
+            ref={searchInputRef}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search iPhone, Samsung, charger"
             aria-label="Search products"
           />
-          <button type="submit">Search</button>
+          <Button type="submit" aria-label="Search products">Search</Button>
         </form>
       </div>
 
       <div className="toolbar">
         <span><Filter size={16} /> {visibleProducts.length} products</span>
-        <button type="button" onClick={() => loadProducts(search.trim())}>
-          <RefreshCcw size={16} /> Refresh
-        </button>
+        <Button variant="secondary" onClick={() => loadProducts(search.trim())}><RefreshCcw size={16} /> Refresh</Button>
       </div>
 
-      {message && <p className="notice">{message}</p>}
+      {message && <Notice>{message}</Notice>}
 
       <div className="product-grid" aria-live="polite">
         {status === "loading" ? (
@@ -94,9 +101,7 @@ export default function CatalogPage() {
         ) : (
           visibleProducts.map((product) => (
             <Link className="product-card" to={`/products/${product.slug}`} key={product.id}>
-              <div className="product-image" aria-hidden="true">
-                <span>{product.name?.slice(0, 2).toUpperCase()}</span>
-              </div>
+              <ProductThumb name={product.name} />
               <div className="product-body">
                 <div className="product-meta">
                   <span>{product.brand?.name || "PhoneHub"}</span>

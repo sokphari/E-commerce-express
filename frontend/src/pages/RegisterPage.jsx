@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
+import Button from "../components/Button";
+import Notice from "../components/Notice";
+import TextField from "../components/TextField";
 import { useAuth } from "../hooks/useAuth";
 
 export default function RegisterPage() {
@@ -30,14 +33,14 @@ export default function RegisterPage() {
       <form className="auth-form" onSubmit={handleSubmit}>
         <p className="eyebrow">New customer</p>
         <h1>Create account</h1>
-        {error && <p className="notice danger">{error}</p>}
+        {error && <Notice tone="danger">{error}</Notice>}
         <div className="form-grid">
-          <label>First name<input value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} required /></label>
-          <label>Last name<input value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} required /></label>
+          <TextField label="First name" value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} required />
+          <TextField label="Last name" value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} required />
         </div>
-        <label>Email<input value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} type="email" required /></label>
-        <label>Password<input value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} type="password" required minLength={8} /></label>
-        <button type="submit" disabled={saving}><UserPlus size={18} /> {saving ? "Creating" : "Create account"}</button>
+        <TextField label="Email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} type="email" required />
+        <TextField label="Password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} type="password" required minLength={8} />
+        <Button type="submit" disabled={saving}><UserPlus size={18} /> {saving ? "Creating" : "Create account"}</Button>
         <p className="form-footer">Already registered? <Link to="/login">Login</Link></p>
       </form>
     </section>

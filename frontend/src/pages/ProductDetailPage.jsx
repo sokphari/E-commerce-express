@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Heart, ShoppingCart, Star } from "lucide-react";
+import Button from "../components/Button";
+import Notice from "../components/Notice";
+import StarRating from "../components/StarRating";
 import { api } from "../api/client";
 import { fallbackProducts } from "../data/fallbackProducts";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
+import { money } from "../lib/format";
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -100,7 +100,7 @@ export default function ProductDetailPage() {
   return (
     <section className="detail-page">
       <Link className="back-link" to="/"><ArrowLeft size={16} /> Back to shop</Link>
-      {message && <p className="notice">{message}</p>}
+      {message && <Notice>{message}</Notice>}
 
       <div className="detail-panel">
         <div className="detail-visual" aria-hidden="true">
@@ -128,8 +128,8 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="detail-actions">
-            <button type="button" onClick={addToCart}><ShoppingCart size={18} /> Add to cart</button>
-            <button type="button" className="secondary" onClick={addToWishlist}><Heart size={18} /> Wishlist</button>
+            <Button type="button" onClick={addToCart}><ShoppingCart size={18} /> Add to cart</Button>
+            <Button type="button" variant="secondary" onClick={addToWishlist}><Heart size={18} /> Wishlist</Button>
           </div>
         </div>
       </div>
@@ -140,24 +140,20 @@ export default function ProductDetailPage() {
             <p className="eyebrow">Customer feedback</p>
             <h2>Reviews</h2>
           </div>
-          <div className="rating-summary">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full bg-warning-bg px-4 py-2 font-extrabold text-warning-ink">
             <Star size={18} fill="currentColor" />
             <strong>{reviews.length ? averageRating.toFixed(1) : "-"}</strong>
             <span>{reviews.length} reviews</span>
           </div>
         </div>
 
-        {reviewsMessage ? <p className="notice">{reviewsMessage}</p> : null}
+        {reviewsMessage ? <Notice tone="danger">{reviewsMessage}</Notice> : null}
 
         {reviews.length ? (
           <div className="review-grid">
             {reviews.map((review) => (
               <article className="review-card" key={review.id}>
-                <div className="review-stars" aria-label={"Rating " + review.rating + " out of 5"}>
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Star className={index < review.rating ? "star-on" : "star-off"} fill="currentColor" size={16} key={index} />
-                  ))}
-                </div>
+                <StarRating value={review.rating} size={16} />
                 <p>{review.comment || "No comment."}</p>
                 <small>{review.user ? review.user.firstName + " " + review.user.lastName : "Customer"}</small>
               </article>

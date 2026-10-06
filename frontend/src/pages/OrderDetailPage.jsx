@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Ban, PackageCheck, ReceiptText, Send, Star } from "lucide-react";
+import { ArrowLeft, Ban, PackageCheck, ReceiptText, Send } from "lucide-react";
+import Button from "../components/Button";
+import Notice from "../components/Notice";
+import StarRating from "../components/StarRating";
+import StatusPill from "../components/StatusPill";
 import { api } from "../api/client";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
-
-function formatDate(value) {
-  return value ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "-";
-}
+import { formatDateTime, money } from "../lib/format";
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -93,21 +90,21 @@ export default function OrderDetailPage() {
   return (
     <section className="checkout-page">
       <Link className="back-link" to="/orders"><ArrowLeft size={16} /> Back to orders</Link>
-      {message ? <p className="notice">{message}</p> : null}
+      {message ? <Notice>{message}</Notice> : null}
 
       {loading ? (
         <div className="cart-card skeleton" />
       ) : order ? (
-        <div className="checkout-layout mt-6">
+        <div className="checkout-layout">
           <div className="checkout-main">
             <section className="cart-card checkout-section">
-              <div className="section-heading"><PackageCheck size={22} /><h1>{order.orderNumber}</h1></div>
-              <p className="muted">Created {formatDate(order.createdAt)}</p>
+              <div className="section-heading"><PackageCheck size={22} className="text-brand" /><h1>{order.orderNumber}</h1></div>
+              <p className="muted">Created {formatDateTime(order.createdAt)}</p>
               <div className="flex flex-wrap gap-3">
-                <span className={`status-pill status-${order.orderStatus?.toLowerCase()}`}>{order.orderStatus}</span>
-                <span className={`status-pill status-${order.paymentStatus?.toLowerCase()}`}>{order.paymentStatus}</span>
+                <StatusPill status={order.orderStatus} />
+                <StatusPill status={order.paymentStatus} />
               </div>
-              {canCancel ? <button className="button-link danger-link" type="button" disabled={saving} onClick={cancelOrder}><Ban size={18} /> Cancel order</button> : null}
+              {canCancel ? <Button variant="danger" type="button" disabled={saving} onClick={cancelOrder}><Ban size={18} /> Cancel order</Button> : null}
             </section>
 
             <section className="cart-card checkout-section">
@@ -128,37 +125,20 @@ export default function OrderDetailPage() {
                     </div>
                     {canReview ? (
                       <div className="review-form-row">
-                        <div className="rating-picker" aria-label={"Review rating for " + item.productName}>
-                          {Array.from({ length: 5 }).map((_, index) => {
-                            const rating = index + 1;
-                            const draft = reviewDrafts[item.productId] || { rating: 5, comment: "" };
-                            return (
-                              <button
-                                type="button"
-                                className={rating <= draft.rating ? "rating-button active" : "rating-button"}
-                                key={rating}
-                                onClick={() => updateReviewDraft(item.productId, { rating })}
-                                title={rating + " stars"}
-                              >
-                                <Star size={16} fill="currentColor" />
-                              </button>
-                            );
-                          })}
-                        </div>
+                        <StarRating
+                          value={reviewDrafts[item.productId]?.rating || 5}
+                          onChange={(rating) => updateReviewDraft(item.productId, { rating })}
+                          ariaLabel={`Review rating for ${item.productName}`}
+                        />
                         <textarea
-                          value={(reviewDrafts[item.productId]?.comment) || ""}
+                          value={reviewDrafts[item.productId]?.comment || ""}
                           onChange={(event) => updateReviewDraft(item.productId, { comment: event.target.value })}
                           rows={3}
                           placeholder="Share your experience with this product"
                         />
-                        <button
-                          className="button-link"
-                          type="button"
-                          disabled={reviewingProductId === item.productId}
-                          onClick={() => submitReview(item)}
-                        >
+                        <Button type="button" disabled={reviewingProductId === item.productId} onClick={() => submitReview(item)}>
                           <Send size={16} /> Submit review
-                        </button>
+                        </Button>
                       </div>
                     ) : null}
                   </article>
@@ -168,7 +148,7 @@ export default function OrderDetailPage() {
           </div>
 
           <aside className="cart-card order-summary">
-            <ReceiptText size={24} />
+            <ReceiptText size={24} className="text-brand" />
             <h2>Payment</h2>
             <div className="summary-line"><span>Subtotal</span><strong>{money(order.subtotal)}</strong></div>
             <div className="summary-line"><span>Shipping</span><strong>{money(order.shippingFee)}</strong></div>
@@ -185,7 +165,7 @@ export default function OrderDetailPage() {
       ) : (
         <div className="simple-panel empty-state">
           <h2>Order not found</h2>
-          <Link className="button-link" to="/orders">Back to orders</Link>
+          <Button to="/orders">Back to orders</Button>
         </div>
       )}
     </section>

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { CheckCircle2, MapPin, Plus, ReceiptText } from "lucide-react";
+import Button from "../components/Button";
+import EmptyState from "../components/EmptyState";
+import Notice from "../components/Notice";
+import PageHeader from "../components/PageHeader";
 import { api } from "../api/client";
-
-function money(value) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value || 0));
-}
+import { money } from "../lib/format";
 
 const initialAddress = {
   recipientName: "",
@@ -102,14 +102,14 @@ export default function CheckoutPage() {
     return (
       <section className="checkout-page">
         <div className="simple-panel success-panel">
-          <CheckCircle2 size={34} />
+          <CheckCircle2 size={34} className="text-success" />
           <p className="eyebrow">Order created</p>
           <h1>{success.orderNumber}</h1>
           <p className="muted">Your order is now saved in the backend.</p>
           <strong>{money(success.totalAmount)}</strong>
           <div className="success-actions">
-            <Link className="button-link" to="/account">View account</Link>
-            <Link className="button-link secondary-link" to="/">Continue shopping</Link>
+            <Button to="/account">View account</Button>
+            <Button variant="secondary" to="/">Continue shopping</Button>
           </div>
         </div>
       </section>
@@ -118,30 +118,29 @@ export default function CheckoutPage() {
 
   return (
     <section className="checkout-page">
-      <div className="page-title-row">
-        <div>
-          <p className="eyebrow">Checkout</p>
-          <h1>Shipping and payment</h1>
-        </div>
-        <Link className="button-link secondary-link" to="/cart">Back to cart</Link>
-      </div>
+      <PageHeader
+        eyebrow="Checkout"
+        title="Shipping and payment"
+        actions={<Button variant="secondary" to="/cart">Back to cart</Button>}
+      />
 
-      {message ? <p className="notice">{message}</p> : null}
+      {message ? <Notice>{message}</Notice> : null}
 
       {loading ? (
         <div className="checkout-layout"><div className="cart-card skeleton" /></div>
       ) : !hasItems ? (
-        <div className="simple-panel empty-state">
-          <ReceiptText size={30} />
-          <h2>No items to checkout</h2>
-          <p className="muted">Add products to your cart before checkout.</p>
-          <Link className="button-link" to="/">Browse products</Link>
-        </div>
+        <EmptyState
+          icon={<ReceiptText size={30} />}
+          title="No items to checkout"
+          description="Add products to your cart before checkout."
+        >
+          <Button to="/">Browse products</Button>
+        </EmptyState>
       ) : (
         <div className="checkout-layout">
           <div className="checkout-main">
             <section className="cart-card checkout-section">
-              <div className="section-heading"><MapPin size={20} /><h2>Shipping address</h2></div>
+              <div className="section-heading"><MapPin size={20} className="text-brand" /><h2>Shipping address</h2></div>
               {addresses.length ? (
                 <div className="address-list">
                   {addresses.map((address) => (
@@ -158,7 +157,7 @@ export default function CheckoutPage() {
               ) : <p className="muted">Create your first shipping address.</p>}
 
               <form className="address-form" onSubmit={createAddress}>
-                <div className="section-heading"><Plus size={18} /><h3>Add new address</h3></div>
+                <div className="section-heading"><Plus size={18} className="text-brand" /><h3>Add new address</h3></div>
                 <div className="form-grid">
                   <label>Recipient<input value={addressForm.recipientName} onChange={(event) => setAddressForm({ ...addressForm, recipientName: event.target.value })} required /></label>
                   <label>Phone<input value={addressForm.phone} onChange={(event) => setAddressForm({ ...addressForm, phone: event.target.value })} required /></label>
@@ -168,7 +167,7 @@ export default function CheckoutPage() {
                   <label>City<input value={addressForm.city} onChange={(event) => setAddressForm({ ...addressForm, city: event.target.value })} required /></label>
                   <label>Province<input value={addressForm.province} onChange={(event) => setAddressForm({ ...addressForm, province: event.target.value })} /></label>
                 </div>
-                <button type="submit" disabled={saving}><Plus size={18} /> Save address</button>
+                <Button type="submit" disabled={saving}><Plus size={18} /> Save address</Button>
               </form>
             </section>
 
@@ -190,8 +189,8 @@ export default function CheckoutPage() {
             </section>
           </div>
 
-          <aside className="cart-card order-summary checkout-summary">
-            <ReceiptText size={24} />
+          <aside className="cart-card order-summary">
+            <ReceiptText size={24} className="text-brand" />
             <h2>Checkout summary</h2>
             <div className="summary-items">
               {cart.items.map((item) => (
@@ -203,7 +202,7 @@ export default function CheckoutPage() {
             </div>
             <div className="summary-line total"><span>Subtotal</span><strong>{money(cart.summary.subtotal)}</strong></div>
             {selectedAddress ? <p className="muted">Ship to {selectedAddress.city}</p> : null}
-            <button type="button" className="checkout-button" disabled={saving || !selectedAddressId} onClick={placeOrder}>{saving ? "Processing" : "Place order"}</button>
+            <Button fullWidth disabled={saving || !selectedAddressId} onClick={placeOrder}>{saving ? "Processing" : "Place order"}</Button>
           </aside>
         </div>
       )}
