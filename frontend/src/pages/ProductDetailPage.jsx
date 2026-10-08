@@ -1,12 +1,78 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, Star } from "lucide-react";
+import { ArrowLeft, BatteryCharging, Camera, Cpu, Gift, Heart, MemoryStick, Radio, ShoppingCart, Smartphone, Speaker, Star, SwatchBook } from "lucide-react";
 import Button from "../components/Button";
 import Notice from "../components/Notice";
 import StarRating from "../components/StarRating";
 import { api } from "../api/client";
 import { fallbackProducts } from "../data/fallbackProducts";
 import { money } from "../lib/format";
+
+function getColorValue(color) {
+  const normalized = String(color || "").toLowerCase();
+  const map = {
+    black: "#111827",
+    white: "#f8fafc",
+    silver: "#cbd5e1",
+    blue: "#2563eb",
+    navy: "#172554",
+    red: "#dc2626",
+    purple: "#8b5cf6",
+    gold: "#d97706",
+    starlight: "#f5efe6",
+    ultramarine: "#3b82f6",
+    aqua: "#14b8a6",
+  };
+
+  const matched = Object.keys(map).find((key) => normalized.includes(key));
+  return matched ? map[matched] : "#0f766e";
+}
+
+function getSpecValue(product, variant, keys, fallback = "Not specified") {
+  const specs = product?.specifications || product?.specs || [];
+  const normalizedKeys = keys.map((key) => key.toLowerCase());
+
+  if (Array.isArray(specs)) {
+    const matched = specs.find((spec) => normalizedKeys.includes(String(spec.key || spec.specKey || "").toLowerCase()));
+    if (matched) return matched.value || matched.specValue || fallback;
+  }
+
+  if (specs && typeof specs === "object" && !Array.isArray(specs)) {
+    const matchedKey = Object.keys(specs).find((key) => normalizedKeys.includes(key.toLowerCase()));
+    if (matchedKey) return specs[matchedKey] || fallback;
+  }
+
+  const fieldMap = {
+    color: variant?.color,
+    memory: [variant?.storage, variant?.ram].filter(Boolean).join(" / "),
+    model: product?.name,
+  };
+
+  const fieldKey = normalizedKeys.find((key) => fieldMap[key]);
+  return fieldKey ? fieldMap[fieldKey] : fallback;
+}
+
+function getFreeGiftOptions(product, variant) {
+  const value = getSpecValue(product, variant, ["gift", "bonus", "promotion"], "");
+  if (value) return String(value).split(",").map((item) => item.trim()).filter(Boolean);
+
+  const category = product?.category?.name?.toLowerCase() || "";
+  if (category.includes("accessories")) return ["Cable organizer", "Warranty card"];
+  if (category.includes("watch")) return ["Watch strap", "Screen protector"];
+  return ["Black case", "Fast charging cable", "Screen protector"];
+}
+
+function SpecItem({ icon, label, value }) {
+  return (
+    <div className="spec-item">
+      <span>{icon}</span>
+      <div>
+        <small>{label}</small>
+        <strong>{value || "Not specified"}</strong>
+      </div>
+    </div>
+  );
+}
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -61,6 +127,25 @@ export default function ProductDetailPage() {
 
   const variants = useMemo(() => product?.variants || [], [product]);
   const selectedVariant = variants.find((variant) => variant.id === selectedVariantId);
+  const colorOptions = useMemo(() => {
+    const colors = variants
+      .filter((variant) => variant.color)
+      .map((variant) => ({ color: variant.color, variantId: variant.id, stockQuantity: variant.stockQuantity }));
+
+    return colors.filter((item, index, all) => all.findIndex((next) => next.color === item.color) === index);
+  }, [variants]);
+  const giftOptions = useMemo(() => getFreeGiftOptions(product, selectedVariant), [product, selectedVariant]);
+  const specItems = [
+    { label: "Model", value: getSpecValue(product, selectedVariant, ["model", "name"], product?.name), icon: <Smartphone size={18} /> },
+    { label: "Color", value: getSpecValue(product, selectedVariant, ["color"]), icon: <SwatchBook size={18} /> },
+    { label: "Gift", value: getSpecValue(product, selectedVariant, ["gift", "bonus", "promotion"]), icon: <Gift size={18} /> },
+    { label: "CPU", value: getSpecValue(product, selectedVariant, ["cpu", "chip", "processor"]), icon: <Cpu size={18} /> },
+    { label: "Battery", value: getSpecValue(product, selectedVariant, ["battery"]), icon: <BatteryCharging size={18} /> },
+    { label: "Sound", value: getSpecValue(product, selectedVariant, ["sound", "speaker", "audio"]), icon: <Speaker size={18} /> },
+    { label: "Selfie camera", value: getSpecValue(product, selectedVariant, ["selfie camera", "front camera", "selfie"]), icon: <Camera size={18} /> },
+    { label: "Comms", value: getSpecValue(product, selectedVariant, ["comms", "connectivity", "network"]), icon: <Radio size={18} /> },
+    { label: "Memory", value: getSpecValue(product, selectedVariant, ["memory", "storage", "ram"]), icon: <MemoryStick size={18} /> },
+  ];
   const averageRating = reviews.length
     ? reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length
     : 0;
@@ -113,6 +198,40 @@ export default function ProductDetailPage() {
           <p className="lede">{product.description || product.shortDescription || "Product detail ready for backend connection."}</p>
           <strong className="price">{money(selectedVariant?.salePrice || selectedVariant?.price || product.minEffectivePrice || product.basePrice)}</strong>
 
+          {colorOptions.length ? (
+            <section className="choice-section" aria-label="Choose color">
+              <div className="choice-heading">
+                <strong>Color</strong>
+                <span>{selectedVariant?.color || "Choose color"}</span>
+              </div>
+              <div className="color-choice-list">
+                {colorOptions.map((item) => (
+                  <button
+                    className={selectedVariant?.color === item.color ? "color-choice active" : "color-choice"}
+                    type="button"
+                    key={item.color}
+                    onClick={() => setSelectedVariantId(item.variantId)}
+                  >
+                    <span style={{ backgroundColor: getColorValue(item.color) }} />
+                    {item.color}
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {giftOptions.length ? (
+            <section className="choice-section" aria-label="Free gift">
+              <div className="choice-heading">
+                <strong>Free gift</strong>
+                <span>Included with this product</span>
+              </div>
+              <div className="gift-list">
+                {giftOptions.map((gift) => <span key={gift}><Gift size={16} /> {gift}</span>)}
+              </div>
+            </section>
+          ) : null}
+
           <div className="variant-list">
             {variants.length ? variants.map((variant) => (
               <button
@@ -126,6 +245,13 @@ export default function ProductDetailPage() {
               </button>
             )) : <p className="muted">Variants will appear here when backend data includes them.</p>}
           </div>
+
+          <section className="detail-specs" aria-label="Product specifications">
+            <div className="section-heading"><Cpu size={20} className="text-brand" /><h2>Product details</h2></div>
+            <div className="spec-grid">
+              {specItems.map((item) => <SpecItem icon={item.icon} label={item.label} value={item.value} key={item.label} />)}
+            </div>
+          </section>
 
           <div className="detail-actions">
             <Button type="button" onClick={addToCart}><ShoppingCart size={18} /> Add to cart</Button>

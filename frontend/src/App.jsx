@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import { AuthProvider } from "./context/AuthContext";
 import AccountPage from "./pages/AccountPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import CatalogPage from "./pages/CatalogPage";
@@ -24,6 +25,7 @@ export default function App() {
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path="account" element={<AccountPage />} />
+            <Route path="admin" element={<AdminDashboardPage />} />
             <Route path="wishlist" element={<WishlistPage />} />
             <Route path="orders" element={<OrdersPage />} />
             <Route path="orders/:id" element={<OrderDetailPage />} />

@@ -18,10 +18,14 @@
   --brand-fg: #ffffff;
   --brand-soft: #f0fdfa;
   --brand-ring: rgba(15, 118, 110, 0.14);
+  --brand-solid: #0f766e;
+  --brand-solid-strong: #115e59;
 
   --danger: #dc2626;
   --danger-strong: #b91c1c;
   --danger-bg: #fef2f2;
+  --danger-solid: #dc2626;
+  --danger-solid-strong: #b91c1c;
   --success: #059669;
   --success-ink: #065f46;
   --success-bg: #ecfdf5;
@@ -51,10 +55,14 @@
   --brand-fg: #ffffff;
   --brand-soft: rgba(20, 184, 166, 0.1);
   --brand-ring: rgba(45, 212, 191, 0.28);
+  --brand-solid: #0f766e;
+  --brand-solid-strong: #115e59;
 
   --danger: #f87171;
   --danger-strong: #fca5a5;
   --danger-bg: rgba(248, 113, 113, 0.12);
+  --danger-solid: #dc2626;
+  --danger-solid-strong: #b91c1c;
   --success: #10b981;
   --success-ink: #6ee7b7;
   --success-bg: rgba(16, 185, 129, 0.12);
@@ -85,10 +93,14 @@
   --color-brand-fg: var(--brand-fg);
   --color-brand-soft: var(--brand-soft);
   --color-brand-ring: var(--brand-ring);
+  --color-brand-solid: var(--brand-solid);
+  --color-brand-solid-strong: var(--brand-solid-strong);
 
   --color-danger: var(--danger);
   --color-danger-strong: var(--danger-strong);
   --color-danger-bg: var(--danger-bg);
+  --color-danger-solid: var(--danger-solid);
+  --color-danger-solid-strong: var(--danger-solid-strong);
   --color-success: var(--success);
   --color-success-ink: var(--success-ink);
   --color-success-bg: var(--success-bg);
@@ -112,7 +124,7 @@
   h2 { @apply m-0 text-xl font-extrabold leading-tight tracking-normal text-ink; }
   h3 { @apply m-0 text-lg font-extrabold leading-tight tracking-normal text-ink; }
   p { @apply m-0; }
-  ::selection { background: var(--brand); color: #fff; }
+  ::selection { background: var(--brand-solid); color: #fff; }
   :where(a, button, input, select, textarea):focus-visible { @apply outline-none ring-2 ring-brand/60 ring-offset-2 ring-offset-canvas; }
 }
 
@@ -121,11 +133,17 @@
   .app-shell { @apply min-h-screen bg-canvas text-ink; }
   .topbar { @apply sticky top-0 z-40 flex items-center justify-between gap-6 border-b border-line bg-canvas/85 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-14; }
   .brand { @apply inline-flex items-center gap-3 font-black text-ink no-underline; }
-  .brand-mark { @apply grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-brand to-blue-700 text-white; }
-  .brand-mark-sm { @apply grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand to-blue-700 text-white; }
-  .nav-links { @apply hidden items-center gap-1 md:flex; }
-  .nav-links a { @apply rounded-lg px-3 py-2 font-bold text-ink-muted no-underline transition hover:bg-surface-muted hover:text-ink; }
-  .nav-links a.active { @apply bg-surface-muted text-ink; }
+  .brand-mark { @apply grid h-10 w-10 place-items-center rounded-lg bg-gradient-to-br from-brand-solid to-blue-700 text-white; }
+  .brand-mark-sm { @apply grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-brand-solid to-blue-700 text-white; }
+  .nav-links { @apply hidden items-center gap-2 md:flex; }
+  .nav-links a { @apply inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 font-extrabold text-ink no-underline transition hover:text-brand; }
+  .nav-links a.active { @apply bg-transparent text-warning-ink; }
+  .nav-dropdown { @apply relative; }
+  .nav-dropdown-menu { @apply invisible absolute left-0 top-full z-50 mt-2 grid min-w-52 translate-y-2 gap-1 rounded-lg border border-line bg-surface p-2 opacity-0 shadow-[var(--shadow-card)] transition; }
+  .nav-dropdown:hover .nav-dropdown-menu, .nav-dropdown:focus-within .nav-dropdown-menu { @apply visible translate-y-0 opacity-100; }
+  .nav-dropdown-menu a { @apply rounded-md px-3 py-2 text-sm font-extrabold text-ink-muted hover:bg-surface-muted hover:text-ink; }
+  .mobile-brand-group { @apply grid gap-1; }
+
   .nav-links a.active-icon { @apply text-ink; }
   .top-actions { @apply flex items-center gap-2; }
   .icon-button { @apply grid h-10 w-10 place-items-center rounded-lg border border-line bg-surface text-ink transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50; }
@@ -142,7 +160,46 @@
   .muted { @apply text-ink-muted; }
 
   /* ---------- Search & toolbar ---------- */
-  .search-panel { @apply grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-lg border border-line bg-surface p-3 shadow-[var(--shadow-card)] sm:grid-cols-[auto_minmax(0,1fr)_auto]; }
+  .hero-carousel { @apply relative mb-7 min-h-[320px] overflow-hidden rounded-lg border border-line bg-surface shadow-[var(--shadow-card)]; }
+  .hero-slide { @apply absolute inset-0 grid gap-6 p-6 opacity-0 transition duration-500 sm:p-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:p-10; }
+  .hero-slide.active { @apply relative opacity-100; }
+  .hero-slide h1 { @apply max-w-3xl text-4xl sm:text-5xl; }
+  .hero-slide p:not(.eyebrow) { @apply mt-4 max-w-2xl text-lg leading-8 text-ink-muted; }
+  .hero-slide button:not(.icon-button) { @apply mt-6 inline-flex rounded-lg bg-brand-solid px-5 py-3 font-black text-brand-fg transition hover:bg-brand-solid-strong; }
+  .hero-media { @apply hidden lg:block; }
+  .hero-media img { @apply h-72 w-full rounded-lg object-cover shadow-[var(--shadow-card)]; }
+  .hero-controls { @apply absolute bottom-4 right-4 flex items-center gap-3 rounded-full border border-line bg-surface/90 p-2 backdrop-blur-md; }
+  .hero-controls > button { @apply grid h-9 w-9 place-items-center rounded-full border border-line bg-surface text-ink transition hover:bg-surface-muted; }
+  .hero-controls div { @apply flex items-center gap-1; }
+  .hero-controls div button { @apply h-2.5 w-2.5 rounded-full border-0 bg-line p-0 transition; }
+  .hero-controls div button.active { @apply w-6 bg-brand; }
+  .brand-strip { @apply mb-7 flex flex-wrap justify-center gap-2.5 rounded-lg bg-surface p-4 shadow-[var(--shadow-card-soft)]; }
+  .brand-pill { @apply inline-flex h-14 min-w-32 items-center justify-center rounded-full border border-line bg-surface px-5 text-lg font-black tracking-normal shadow-[var(--shadow-card-soft)] transition hover:-translate-y-1 hover:border-brand hover:shadow-[var(--shadow-card)]; }
+  .brand-apple { @apply text-black dark:text-white; }
+  .brand-samsung { @apply text-black dark:text-white; letter-spacing: 0.08em; }
+  .brand-oppo { color: #087a3b; }
+  .brand-vivo { color: #4968f5; letter-spacing: 0.12em; }
+  .brand-huawei { color: #d71920; }
+  .brand-realme { @apply text-ink-muted; }
+  .brand-honor { @apply text-black dark:text-white; letter-spacing: 0.08em; }
+  .brand-nokia, .brand-tecno, .brand-anker { color: #1262ad; }
+  .brand-infinix { @apply text-black dark:text-white; }
+  .brand-xiaomi { color: #ff6900; }
+  .brand-blackshark, .brand-nillkin, .brand-coteci { color: #12b981; }
+  .brand-alnastyle { @apply text-ink; }
+  .brand-hoco { @apply text-ink-muted; }
+  .brand-xundd { color: #df2735; letter-spacing: 0.08em; }
+  .brand-dji, .brand-sony { @apply text-black dark:text-white; letter-spacing: 0.08em; }
+  .brand-jbl { @apply bg-[#ff3b18] text-white; }
+  .brand-marshall { font-family: Georgia, serif; @apply text-black dark:text-white; }
+  .brand-hiksemi { color: #e11d2e; }
+  .banner-grid { @apply mb-6 grid gap-4 md:grid-cols-3; }
+  .promo-banner { @apply flex min-h-44 items-start gap-4 rounded-lg border border-line bg-surface p-5 shadow-[var(--shadow-card-soft)] transition hover:-translate-y-1 hover:border-brand; }
+  .promo-banner-icon { @apply grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand; }
+  .promo-banner small { @apply text-xs font-extrabold uppercase tracking-wider text-brand; }
+  .promo-banner h2 { @apply mt-2 text-xl; }
+  .promo-banner p { @apply mt-3 leading-7 text-ink-muted; }
+  .search-panel { @apply grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-lg border border-line bg-surface p-3 shadow-[var(--shadow-card)]; }
   .search-panel input { @apply min-w-0 border-0 bg-transparent text-ink outline-none placeholder:text-ink-muted/60; }
   .toolbar { @apply my-5 flex flex-col gap-3 text-ink-muted sm:flex-row sm:items-center sm:justify-between; }
   .toolbar > span, .toolbar > button { @apply inline-flex items-center gap-2; }
@@ -151,9 +208,27 @@
   .cart-card { @apply rounded-lg border border-line bg-surface shadow-[var(--shadow-card)]; }
 
   /* ---------- Catalog ---------- */
+  .product-showcase { @apply mb-10; }
+  .product-showcase.compact { @apply mt-14; }
+  .showcase-heading { @apply mb-5 flex items-end justify-between gap-4; }
+  .showcase-controls { @apply flex shrink-0 items-center gap-2; }
+  .showcase-controls button { @apply grid h-10 w-10 place-items-center rounded-full border border-line bg-surface text-ink shadow-[var(--shadow-card-soft)] transition hover:border-brand hover:bg-surface-muted; }
+  .showcase-heading h2 { @apply text-3xl font-black uppercase leading-none sm:text-4xl; }
+  .showcase-heading h2 span { @apply text-blue-900 dark:text-blue-300; }
+  .showcase-heading h2 { color: #c28312; }
+  .showcase-heading p { @apply mt-3 text-ink-muted; }
+  .showcase-scroll { @apply flex gap-5 overflow-x-auto pb-4 outline-none snap-x snap-mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+  .showcase-scroll::-webkit-scrollbar { display: none; }
+  .showcase-card { @apply grid min-h-72 w-[180px] shrink-0 snap-start content-start gap-3 rounded-lg bg-surface p-4 text-center text-ink no-underline shadow-[var(--shadow-card-soft)] transition hover:-translate-y-1 hover:shadow-[var(--shadow-card)] sm:w-[200px]; }
+  .showcase-card h3 { @apply text-sm font-extrabold leading-6; }
+  .showcase-card > span { @apply mt-auto text-sm font-extrabold text-[#c28312]; }
+  .showcase-thumb { @apply min-h-36 rounded-md bg-gradient-to-br from-surface-muted via-surface to-brand-soft text-brand; }
+  .showcase-thumb span { @apply h-20 w-20 rounded-2xl text-2xl; }
+  .showcase-price { @apply text-lg font-black text-[#c28312]; }
+  .view-more-link { @apply ml-auto mt-4 block border-0 bg-transparent text-sm font-black uppercase tracking-wider text-[#c28312] transition hover:text-brand; }
   .product-grid { @apply grid gap-5 sm:grid-cols-2 xl:grid-cols-3; }
   .product-card { @apply flex min-h-[420px] flex-col overflow-hidden rounded-lg border border-line bg-surface text-ink no-underline shadow-[var(--shadow-card-soft)] transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-[var(--shadow-card)]; }
-  .product-image, .detail-visual { @apply grid min-h-52 place-items-center bg-gradient-to-br from-brand via-blue-700 to-slate-900 text-white; }
+  .product-image, .detail-visual { @apply grid min-h-52 place-items-center bg-gradient-to-br from-brand-solid via-blue-700 to-slate-900 text-white; }
   .product-image span, .detail-visual span { @apply grid h-28 w-28 place-items-center rounded-3xl border border-white/30 bg-white/10 text-3xl font-black backdrop-blur-sm; }
   .product-body { @apply flex flex-1 flex-col gap-3 p-5; }
   .product-meta, .product-footer { @apply flex items-center justify-between gap-3 text-sm text-ink-muted; }
@@ -172,6 +247,22 @@
   .variant-option { @apply flex w-full items-center justify-between gap-3 rounded-lg border border-line bg-surface p-3 text-left transition hover:border-brand; }
   .variant-option.active { @apply border-brand ring-4 ring-brand-ring; }
   .variant-option small { @apply text-ink-muted; }
+  .choice-section { @apply grid gap-3 rounded-lg border border-line bg-surface-muted p-4; }
+  .choice-heading { @apply flex flex-wrap items-center justify-between gap-2; }
+  .choice-heading strong { @apply text-ink; }
+  .choice-heading span { @apply text-sm font-bold text-ink-muted; }
+  .color-choice-list, .gift-list { @apply flex flex-wrap gap-2; }
+  .color-choice { @apply inline-flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-sm font-extrabold text-ink transition hover:border-brand; }
+  .color-choice.active { @apply border-brand ring-4 ring-brand-ring; }
+  .color-choice span { @apply h-5 w-5 rounded-full border border-line; }
+  .gift-list span { @apply inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-3 py-2 text-sm font-extrabold text-brand; }
+  .detail-specs { @apply grid gap-4 rounded-lg border border-line bg-surface-muted p-4; }
+  .spec-grid { @apply grid gap-3 sm:grid-cols-2 xl:grid-cols-3; }
+  .spec-item { @apply flex min-h-24 items-start gap-3 rounded-lg border border-line bg-surface p-3; }
+  .spec-item > span { @apply grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand; }
+  .spec-item div { @apply grid gap-1; }
+  .spec-item small { @apply text-xs font-black uppercase tracking-wider text-ink-muted; }
+  .spec-item strong { @apply text-sm leading-6 text-ink; }
   .detail-actions { @apply mt-auto flex flex-wrap gap-3; }
 
   /* ---------- Auth / simple panels ---------- */
@@ -186,7 +277,7 @@
   .checkout-main { @apply grid gap-5; }
   .cart-items-panel { @apply grid overflow-hidden; }
   .cart-item { @apply grid gap-4 border-b border-line p-4 last:border-b-0 sm:grid-cols-[76px_minmax(0,1fr)_auto_auto_40px] sm:items-center; }
-  .cart-item-image { @apply grid h-19 w-19 place-items-center rounded-lg bg-gradient-to-br from-brand to-blue-700 font-black text-white; }
+  .cart-item-image { @apply grid h-19 w-19 place-items-center rounded-lg bg-gradient-to-br from-brand-solid to-blue-700 font-black text-white; }
   .cart-item-copy { @apply min-w-0; }
   .cart-item-copy h2 { @apply mb-1; }
   .cart-item-copy p, .cart-item-copy span, .cart-item-total small { @apply block text-ink-muted; }
@@ -233,7 +324,7 @@
   .address-card { @apply grid gap-4 rounded-lg border border-line bg-surface-muted p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start; }
   .address-card.default { @apply border-brand bg-brand-soft; }
   .address-card-title { @apply mb-1 flex flex-wrap items-center gap-2 text-ink; }
-  .address-card-title span { @apply rounded-full bg-brand px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-fg; }
+  .address-card-title span { @apply rounded-full bg-brand-solid px-3 py-1 text-xs font-black uppercase tracking-wider text-brand-fg; }
   .address-actions { @apply flex flex-wrap items-center gap-2; }
   .checkbox-label { @apply flex items-center gap-2 font-extrabold text-ink-muted; }
   .checkbox-label input { @apply h-4 w-4 accent-brand; }
@@ -256,4 +347,43 @@
   .rating-picker { @apply flex items-center gap-1; }
   .rating-button { @apply grid h-9 w-9 place-items-center rounded-lg border border-line bg-surface text-ink-muted transition hover:border-warning hover:text-warning; }
   .rating-button.active { @apply border-warning bg-warning-bg text-warning-ink; }
+
+  /* ---------- Admin ---------- */
+  .admin-shell { @apply min-h-screen bg-canvas text-ink lg:grid lg:grid-cols-[260px_minmax(0,1fr)]; }
+  .admin-sidebar { @apply border-b border-line bg-surface px-4 py-4 shadow-[var(--shadow-card-soft)] lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:px-5 lg:py-6; }
+  .admin-sidebar-brand { @apply mb-5 flex items-center gap-3 font-black text-ink no-underline; }
+  .admin-sidebar-nav { @apply grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-1; }
+  .admin-sidebar-nav a, .admin-sidebar-logout { @apply flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 text-left text-sm font-extrabold text-ink-muted no-underline transition hover:border-line hover:bg-surface-muted hover:text-ink; }
+  .admin-sidebar-nav a.active { @apply bg-brand-soft text-brand; }
+  .admin-sidebar-logout { @apply mt-4 w-full bg-transparent text-danger hover:bg-danger-bg hover:text-danger-strong; }
+  .admin-main { @apply min-w-0; }
+  .admin-topbar { @apply sticky top-0 z-30 flex flex-col gap-4 border-b border-line bg-canvas/90 px-4 py-4 backdrop-blur-md sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8; }
+  .admin-topbar h1 { @apply text-3xl sm:text-4xl; }
+  .admin-topbar-actions { @apply flex flex-wrap items-center gap-2; }
+  .admin-profile { @apply inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-surface px-3 font-extrabold text-ink no-underline transition hover:bg-surface-muted; }
+  .admin-content { @apply grid gap-6 px-4 py-6 sm:px-6 lg:px-8; }
+  .admin-stat-grid { @apply grid gap-4 sm:grid-cols-2 xl:grid-cols-4; }
+  .admin-stat-card { @apply flex min-h-36 items-start justify-between gap-4 rounded-lg border border-line bg-surface p-5 text-ink no-underline shadow-[var(--shadow-card-soft)] transition hover:-translate-y-1 hover:border-brand; }
+  .admin-stat-icon { @apply grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-brand-soft text-brand; }
+  .admin-stat-copy { @apply grid min-w-0 gap-1 text-right; }
+  .admin-stat-copy small { @apply text-sm font-extrabold uppercase tracking-wider text-ink-muted; }
+  .admin-stat-copy strong { @apply truncate text-3xl font-black leading-none text-ink; }
+  .admin-stat-copy em { @apply text-sm not-italic text-ink-muted; }
+  .admin-dashboard-grid { @apply grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]; }
+  .admin-operations-grid { @apply grid gap-5 xl:grid-cols-2; }
+  .admin-panel { @apply grid gap-4 rounded-lg border border-line bg-surface p-5 shadow-[var(--shadow-card)]; }
+  .admin-panel-header { @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between; }
+  .admin-chart { @apply flex h-72 items-end gap-3 rounded-lg border border-line bg-surface-muted p-4; }
+  .admin-chart span { @apply relative flex flex-1 items-end justify-center rounded-t-lg bg-gradient-to-t from-brand-solid to-blue-600 transition hover:from-brand-solid-strong hover:to-blue-500; }
+  .admin-chart span em { @apply absolute -top-7 hidden rounded-md bg-ink px-2 py-1 text-xs not-italic text-canvas shadow-[var(--shadow-card-soft)] sm:block; }
+  .admin-list { @apply grid gap-3; }
+  .admin-row { @apply grid gap-3 rounded-lg border border-line bg-surface-muted p-4 text-ink no-underline transition hover:border-brand md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center; }
+  .admin-row-main { @apply grid min-w-0 gap-1; }
+  .admin-row-main strong { @apply truncate; }
+  .admin-row-main small { @apply truncate text-sm text-ink-muted; }
+  .admin-workbench { @apply grid gap-3 md:grid-cols-2; }
+  .admin-action-card { @apply grid gap-2 rounded-lg border border-line bg-surface-muted p-4; }
+  .admin-action-card span { @apply font-black text-ink; }
+
+
 }

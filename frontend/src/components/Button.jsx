@@ -9,10 +9,10 @@ const sizes = {
 };
 
 const variants = {
-  primary: "bg-brand text-brand-fg hover:bg-brand-strong",
+  primary: "bg-brand-solid text-brand-fg hover:bg-brand-solid-strong",
   secondary: "bg-surface-muted text-ink hover:bg-line",
   ghost: "bg-transparent text-ink-muted hover:bg-surface-muted hover:text-ink",
-  danger: "bg-danger text-white hover:bg-danger-strong",
+  danger: "bg-danger-solid text-white hover:bg-danger-solid-strong",
   dangerGhost: "bg-transparent text-danger hover:bg-danger-bg",
 };
 

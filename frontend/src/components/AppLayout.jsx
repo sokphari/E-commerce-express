@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { Heart, LogOut, Menu, Search, ShoppingBag, Smartphone, UserRound, X } from "lucide-react";
+import { ChevronDown, Heart, LogOut, Menu, Search, ShoppingBag, Smartphone, UserRound, X } from "lucide-react";
 import Button from "./Button";
 import ThemeToggle from "./ThemeToggle";
+import { api } from "../api/client";
 import { useAuth } from "../hooks/useAuth";
 
 function navItems(user) {
   const items = [
-    { to: "/", label: "Shop", end: true },
-    { to: "/cart", label: "Cart", end: false },
-    { to: "/checkout", label: "Checkout", end: false },
+    { to: "/", label: "Home", end: true },
+    { to: "/", label: "Brands", end: true, hasMenu: true, state: { focusSearch: true } },
+    { to: "/", label: "Smartphone", end: true, hasMenu: true, state: { search: "phone" } },
+    { to: "/", label: "Accessories", end: true, hasMenu: true, state: { search: "accessories" } },
   ];
 
   if (user) {
@@ -20,12 +22,33 @@ function navItems(user) {
     );
   }
 
+  if (user?.role === "ADMIN") {
+    items.push({ to: "/admin", label: "Admin", end: false });
+  }
+
   return items;
 }
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [brands, setBrands] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+
+    api.getBrands("?limit=30")
+      .then((response) => {
+        if (active) setBrands(response.data || []);
+      })
+      .catch(() => {
+        if (active) setBrands([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const closeMenu = () => setMenuOpen(false);
   const items = navItems(user);
@@ -35,34 +58,56 @@ export default function AppLayout() {
       <header className="topbar">
         <Link className="brand" to="/">
           <span className="brand-mark"><Smartphone size={22} /></span>
-          <span>PhoneHub</span>
+          <span className="hidden sm:inline">PhoneHub</span>
         </Link>
 
         <nav className="nav-links" aria-label="Main navigation">
           {items.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end}>{item.label}</NavLink>
+            item.label === "Brands" ? (
+              <div className="nav-dropdown" key={item.label}>
+                <Link className="nav-menu-link" to={item.to} state={item.state}>{item.label}<ChevronDown size={14} /></Link>
+                {brands.length ? (
+                  <div className="nav-dropdown-menu" role="menu" aria-label="Brand menu">
+                    {brands.map((brand) => (
+                      <Link
+                        key={brand.id}
+                        to="/"
+                        state={{ brandId: brand.id, searchLabel: brand.name }}
+                        role="menuitem"
+                      >
+                        {brand.name}
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : item.hasMenu ? (
+              <Link className="nav-menu-link" key={item.label} to={item.to} state={item.state}>{item.label}<ChevronDown size={14} /></Link>
+            ) : (
+              <NavLink key={item.label} to={item.to} end={item.end} state={item.state}>{item.label}</NavLink>
+            )
           ))}
         </nav>
 
         <div className="top-actions">
-          <Link className="icon-button" to="/" state={{ focusSearch: true }} title="Search products" aria-label="Search products">
+          <button className="icon-button hidden sm:grid" type="button" title="Search disabled" aria-label="Search disabled" disabled>
             <Search size={18} />
-          </Link>
+          </button>
           <ThemeToggle />
           <Link className="icon-button" to="/cart" title="Open cart" aria-label="Open cart">
             <ShoppingBag size={18} />
           </Link>
           {user ? (
-            <Link className="icon-button" to="/wishlist" title="Open wishlist" aria-label="Open wishlist">
+            <Link className="icon-button hidden sm:grid" to="/wishlist" title="Open wishlist" aria-label="Open wishlist">
               <Heart size={18} />
             </Link>
           ) : null}
           {user ? (
-            <button className="icon-button" type="button" title="Logout" aria-label="Logout" onClick={logout}>
+            <button className="icon-button hidden sm:grid" type="button" title="Logout" aria-label="Logout" onClick={logout}>
               <LogOut size={18} />
             </button>
           ) : (
-            <Link className="icon-button" to="/login" title="Login" aria-label="Login">
+            <Link className="icon-button hidden sm:grid" to="/login" title="Login" aria-label="Login">
               <UserRound size={18} />
             </Link>
           )}
@@ -92,16 +137,58 @@ export default function AppLayout() {
             </div>
             <nav className="grid gap-1" aria-label="Mobile navigation">
               {items.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end}
-                  onClick={closeMenu}
-                  className="rounded-lg px-3 py-2.5 font-bold text-ink-muted no-underline transition hover:bg-surface-muted hover:text-ink"
-                >
-                  {item.label}
-                </NavLink>
+                item.label === "Brands" ? (
+                  <div className="mobile-brand-group" key={item.label}>
+                    <Link
+                      to={item.to}
+                      state={item.state}
+                      onClick={closeMenu}
+                      className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 font-bold text-ink-muted no-underline transition hover:bg-surface-muted hover:text-ink"
+                    >
+                      {item.label}<ChevronDown size={14} />
+                    </Link>
+                    {brands.slice(0, 12).map((brand) => (
+                      <Link
+                        key={brand.id}
+                        to="/"
+                        state={{ brandId: brand.id, searchLabel: brand.name }}
+                        onClick={closeMenu}
+                        className="rounded-lg px-6 py-2 text-sm font-bold text-ink-muted no-underline transition hover:bg-surface-muted hover:text-ink"
+                      >
+                        {brand.name}
+                      </Link>
+                    ))}
+                  </div>
+                ) : item.hasMenu ? (
+                  <Link
+                    key={item.label}
+                    to={item.to}
+                    state={item.state}
+                    onClick={closeMenu}
+                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 font-bold text-ink-muted no-underline transition hover:bg-surface-muted hover:text-ink"
+                  >
+                    {item.label}<ChevronDown size={14} />
+                  </Link>
+                ) : (
+                  <NavLink
+                    key={item.label}
+                    to={item.to}
+                    end={item.end}
+                    state={item.state}
+                    onClick={closeMenu}
+                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 font-bold text-ink-muted no-underline transition hover:bg-surface-muted hover:text-ink"
+                  >
+                    {item.label}
+                  </NavLink>
+                )
               ))}
+              <button
+                type="button"
+                disabled
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 font-bold text-ink-muted opacity-60"
+              >
+                <Search size={18} /> Search disabled
+              </button>
             </nav>
             <div className="grid gap-3">
               {user ? (

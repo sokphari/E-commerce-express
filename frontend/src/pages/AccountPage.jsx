@@ -138,7 +138,8 @@ export default function AccountPage() {
           <ShieldCheck size={20} />
           <div>
             <strong>Admin account detected</strong>
-            <p className="muted">Customer account tools still work here. A dedicated admin dashboard should be built as a separate area next.</p>
+            <p className="muted">Customer account tools still work here. Use the admin dashboard for catalog, order, payment, inventory, and review monitoring.</p>
+            <Button to="/admin" size="sm" className="mt-3">Open admin dashboard</Button>
           </div>
         </div>
       ) : null}

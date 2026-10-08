@@ -50,6 +50,7 @@ export async function apiRequest(path, options = {}) {
 
 export const api = {
   getProducts: (query = "") => apiRequest(`/products${query}`),
+  getBrands: (query = "") => apiRequest(`/brands${query}`),
   getProduct: (slug) => apiRequest(`/products/${slug}`),
   login: (input) => apiRequest("/auth/login", { method: "POST", body: JSON.stringify(input) }),
   register: (input) => apiRequest("/auth/register", { method: "POST", body: JSON.stringify(input) }),
@@ -74,4 +75,10 @@ export const api = {
   createReview: (productId, input) => apiRequest(`/products/${productId}/reviews`, { method: "POST", body: JSON.stringify(input) }),
   updateReview: (id, input) => apiRequest(`/reviews/${id}`, { method: "PATCH", body: JSON.stringify(input) }),
   deleteReview: (id) => apiRequest(`/reviews/${id}`, { method: "DELETE" }),
+  getAdminProducts: (query = "") => apiRequest(`/admin/products${query}`),
+  getAdminVariants: (query = "") => apiRequest(`/admin/variants${query}`),
+  getAdminOrders: (query = "") => apiRequest(`/admin/orders${query}`),
+  getAdminPayments: (query = "") => apiRequest(`/admin/payments${query}`),
+  getAdminInventoryMovements: (query = "") => apiRequest(`/admin/inventory-movements${query}`),
+  getAdminReviews: (query = "") => apiRequest(`/admin/reviews${query}`),
 };

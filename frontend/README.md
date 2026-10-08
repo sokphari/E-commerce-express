@@ -57,7 +57,8 @@ npm run preview
 - Register page
 - Cart page with quantity update, remove, clear, and checkout navigation
 - Checkout page with address creation, address selection, payment method, notes, and order placement
-- Account dashboard with profile, stats, recent orders, admin note, and address management
+- Account dashboard with profile, stats, recent orders, admin dashboard link, and address management
+- Admin dashboard foundation with protected store operations overview
 - Wishlist page with saved products and removal
 - Order history page
 - Order detail page with items, payment summary, eligible cancel action, and delivered-order review form
@@ -116,7 +117,18 @@ Current account flow:
 4. Customers can set a default address.
 5. Customers can delete saved addresses.
 6. Recent orders appear on the account dashboard.
-7. Admin users see an admin account note until a dedicated admin dashboard is built.
+7. Admin users can open `/admin` from the account page or main navigation.
+
+## Admin Dashboard
+
+Current admin flow:
+
+1. Admin users can open `/admin`.
+2. Guests are sent to login from the admin page.
+3. Non-admin users see an access-only message.
+4. The dashboard loads product, variant, order, payment, inventory movement, and review summaries from backend admin APIs.
+5. Admin can refresh the dashboard without leaving the page.
+6. Metric cards jump to the related dashboard section.
 
 ## Reviews
 
@@ -157,5 +169,6 @@ Current browser flow:
 
 ## Next Frontend Tasks
 
-1. Add admin dashboard foundation.
-2. Add frontend UI polish and responsive pass.
+1. Build full admin CRUD screens for products and variants.
+2. Add admin order/payment status actions.
+3. Add frontend UI polish and responsive pass.
