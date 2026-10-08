@@ -3,8 +3,10 @@ const { sanitizeProduct } = require("../utils/product");
 const { createSlug } = require("../utils/slug");
 const { getPagination, buildPaginationMeta } = require("../utils/pagination");
 const productRepository = require("../repositories/product.repository");
+const variantRepository = require("../repositories/product-variant.repository");
 const brandRepository = require("../repositories/brand.repository");
 const categoryRepository = require("../repositories/category.repository");
+const { sanitizeProductVariant } = require("../utils/product-variant");
 
 async function ensureUniqueSlug(slug, currentProductId = null) {
   const existingProduct = await productRepository.findBySlug(slug);
@@ -109,7 +111,17 @@ async function getProductBySlug(slug) {
     throw new ApiError(404, "Product not found");
   }
 
-  return sanitizeProduct(product);
+  const { rows } = await variantRepository.listVariants({
+    productId: product.id,
+    status: "ACTIVE",
+    limit: 100,
+    offset: 0,
+  });
+
+  return {
+    ...sanitizeProduct(product),
+    variants: rows.map(sanitizeProductVariant),
+  };
 }
 
 async function createProduct(input) {

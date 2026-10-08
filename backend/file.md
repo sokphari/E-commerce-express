@@ -1160,6 +1160,238 @@ cd /home/phari/Desktop/phoneHub/frontend
 npm run dev
 ```
 
+## Frontend Cart And Checkout Flow Completed
+
+The customer cart and checkout browser flow has been connected to backend endpoints.
+
+Updated frontend files:
+
+- `src/api/client.js`
+- `src/pages/CartPage.jsx`
+- `src/pages/CheckoutPage.jsx`
+- `src/App.jsx`
+- `src/components/AppLayout.jsx`
+- `src/index.css`
+- `README.md`
+
+Completed frontend behavior:
+
+- Cart loads from `GET /api/v1/cart`.
+- Customer can increase/decrease cart item quantity.
+- Customer can remove one cart item.
+- Customer can clear the cart.
+- Checkout loads cart and addresses.
+- Customer can create a shipping address.
+- Customer can select an existing address.
+- Customer can select payment method.
+- Customer can add checkout notes.
+- Customer can place order through `POST /api/v1/checkout`.
+- Success screen shows backend order number and total.
+
+Verification result:
+
+```text
+frontend npm run lint passed
+frontend npm run build passed
+```
+
+## Frontend Tailwind CSS Migration Completed
+
+Frontend styling has been migrated to Tailwind CSS for reusable UX patterns and faster page development.
+
+Updated frontend files:
+
+- `package.json`
+- `package-lock.json`
+- `vite.config.js`
+- `src/index.css`
+- `src/components/ui.js`
+- `README.md`
+
+Tailwind behavior:
+
+- Vite now uses the official `@tailwindcss/vite` plugin.
+- `src/index.css` imports Tailwind.
+- Existing frontend UI classes are now powered by Tailwind `@apply`.
+- Future frontend work should use Tailwind utility classes or reusable Tailwind component classes.
+
+Verification result:
+
+```text
+frontend npm run lint passed
+frontend npm run build passed
+```
+
+## Frontend Wishlist And Order History Completed
+
+Customer wishlist and order history screens have been connected to backend endpoints.
+
+Updated frontend files:
+
+- `src/api/client.js`
+- `src/App.jsx`
+- `src/components/AppLayout.jsx`
+- `src/pages/ProductDetailPage.jsx`
+- `src/pages/AccountPage.jsx`
+- `src/pages/WishlistPage.jsx`
+- `src/pages/OrdersPage.jsx`
+- `src/pages/OrderDetailPage.jsx`
+- `src/index.css`
+- `README.md`
+
+Completed frontend behavior:
+
+- Product detail can add real backend products to wishlist.
+- Customer can view wishlist products.
+- Customer can remove products from wishlist.
+- Customer can view order history.
+- Customer can open order detail.
+- Order detail shows order items, payment summary, statuses, and total.
+- Customer can cancel eligible orders.
+- Navbar and account page link to wishlist and orders.
+- New UI uses Tailwind CSS component classes.
+
+Verification result:
+
+```text
+frontend npm run lint passed
+frontend npm run build passed
+```
+
+## Frontend Review Submission Flow Completed
+
+Customer review display and submission flow has been connected to backend review endpoints.
+
+Updated frontend files:
+
+- `src/api/client.js`
+- `src/pages/ProductDetailPage.jsx`
+- `src/pages/OrderDetailPage.jsx`
+- `src/index.css`
+- `README.md`
+
+Completed frontend behavior:
+
+- Product detail loads approved reviews from `GET /api/v1/products/:productId/reviews`.
+- Product detail shows average rating, review count, review cards, and empty review state.
+- Delivered order detail shows review form for each purchased product.
+- Customer can choose 1 to 5 star rating.
+- Customer can submit optional review comment.
+- Review submits through `POST /api/v1/products/:productId/reviews`.
+- Success message explains the review is pending admin approval.
+- Review UI uses Tailwind CSS component classes.
+
+UI check:
+
+- Frontend build passed.
+- Frontend lint passed.
+- Headless browser loaded the running Vite app without Tailwind/Vite runtime errors after the CSS fix.
+- A 1440x1000 screenshot was captured for the storefront route during validation.
+
+Verification result:
+
+```text
+frontend npm run lint passed
+frontend npm run build passed
+```
+
+## Frontend Account Dashboard And Address Management Completed
+
+The account page has been upgraded from a small profile card into a customer dashboard.
+
+Updated frontend files:
+
+- `src/api/client.js`
+- `src/pages/AccountPage.jsx`
+- `src/index.css`
+- `README.md`
+
+Completed frontend behavior:
+
+- Account page shows profile summary.
+- Account page shows wishlist, orders, and address counts.
+- Account page loads recent orders.
+- Customer can list saved addresses.
+- Customer can create a shipping address.
+- Customer can set a default address.
+- Customer can delete saved addresses.
+- Admin role gets a visible admin note until the admin dashboard is created.
+- UI now fills the page more naturally and uses Tailwind CSS component classes.
+
+Verification result:
+
+```text
+frontend npm run lint passed
+frontend npm run build passed
+```
+
+## Frontend Admin Dashboard Foundation Completed
+
+The frontend now has a separate admin workspace for store operations.
+
+Updated frontend files:
+
+- `src/App.jsx`
+- `src/api/client.js`
+- `src/components/AppLayout.jsx`
+- `src/pages/AccountPage.jsx`
+- `src/pages/AdminDashboardPage.jsx`
+- `src/index.css`
+- `README.md`
+
+Completed frontend behavior:
+
+- `/admin` route was added.
+- Guest users see a login prompt before accessing admin dashboard.
+- Logged-in non-admin users see an admin-only access message.
+- Admin users see a store operations dashboard with header, sidebar, metric cards, chart area, and recent orders.
+- Admin navigation link appears only for `ADMIN` users.
+- Account page admin note now links to the admin dashboard.
+- Dashboard loads admin summaries for products, variants, orders, payments, inventory movements, and reviews.
+- Dashboard has dark/light toggle, notification button, admin profile link, logout, metric cards, sales chart, recent order list, payment list, inventory movement list, review queue, and catalog snapshot.
+- Dashboard refresh button reloads admin data without leaving the page.
+- Admin UI uses Tailwind CSS component classes and the existing light/dark theme tokens.
+
+Verification result:
+
+```text
+frontend npm run lint passed with one non-blocking React effect warning
+frontend npm run build passed
+```
+
+## Demo Product Seed Data Completed
+
+Local fake product data has been added for storefront testing.
+
+Completed files:
+
+- `scripts/seed-products.js`
+- `package.json`
+
+Seed command:
+
+```bash
+npm run seed:products
+```
+
+What the seed creates:
+
+- 20 active products
+- Active brands for the products
+- Active product categories
+- One active variant per seeded product
+- Stock quantities for each seeded variant
+- Inventory `STOCK_IN` movement records for seed stock
+
+Seed verification result:
+
+```text
+products: 20
+variants: 21
+brands: 9
+categories: 5
+```
+
 ## Useful Commands
 
 Start development server:
@@ -1203,15 +1435,15 @@ http://localhost:5000/api-docs
 Next recommended task:
 
 ```text
-Frontend cart and checkout flow
+Frontend admin product and variant management screens
 ```
 
 Reason:
 
-Frontend foundation is created. The next useful task is connecting the cart and checkout screens to the backend so a customer can complete the buying flow from the browser.
+Frontend admin dashboard foundation is complete. The next useful task is to let admin users create, update, and archive products and variants from the frontend instead of using Postman or Swagger.
 
 Recommended build order:
 
-1. Frontend cart and checkout flow
-2. Frontend wishlist and order history
-3. Admin dashboard foundation
+1. Frontend admin product and variant management screens
+2. Frontend admin order/payment status actions
+3. Frontend UI polish and responsive pass

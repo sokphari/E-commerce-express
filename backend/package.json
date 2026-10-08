@@ -12,7 +12,8 @@
     "test:watch": "jest --watch",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f backend"
+    "docker:logs": "docker compose logs -f backend",
+    "seed:products": "node scripts/seed-products.js"
   },
   "keywords": [],
   "author": "",
